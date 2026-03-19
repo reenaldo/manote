@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maintenance</title>
+  <!-- style.css is not loaded during Netlify maintenance, so we inline the essentials below -->
+  <style>
+    :root {
+      --bg-primary: #0a0e27;
+      --bg-secondary: #0f1429;
+      --bg-card: #151933;
+      --neon-cyan: #00f5ff;
+      --neon-pink: #ff006e;
+      --neon-purple: #b537f2;
+      --neon-green: #39ff14;
+      --neon-yellow: #ffed4e;
+      --neon-blue: #0ff;
+      --text-primary: #e8f1ff;
+      --text-secondary: #8b9dc3;
+      --text-tertiary: #5a6f8f;
+      --text-accent: var(--neon-cyan);
+      --grid-color: rgba(0, 245, 255, 0.1);
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.75rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --border-width: 1px;
+      --border-radius: 4px;
+      --border-radius-lg: 8px;
+      --shadow-sm: 0 0 10px rgba(0, 245, 255, 0.2);
+      --shadow-md: 0 0 20px rgba(0, 245, 255, 0.3);
+      --shadow-lg: 0 0 30px rgba(0, 245, 255, 0.4);
+      --shadow-neon-cyan: 0 0 15px rgba(0, 245, 255, 0.5);
+      --shadow-neon-pink: 0 0 15px rgba(255, 0, 110, 0.5);
+      --shadow-neon-purple: 0 0 15px rgba(181, 55, 242, 0.5);
+      --shadow-neon-green: 0 0 15px rgba(57, 255, 20, 0.5);
+    }
+    body {
+      font-family: "Courier New", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
+      background: var(--bg-primary, #0a0e27) !important;
+      color: var(--text-primary, #e8f1ff);
+      line-height: 1.5;
+      position: relative;
+      min-height: 100vh;
+    }
+    body, html {
+      height: 100%;
+      background: var(--bg-primary, #0a0e27) !important;
+      color: var(--text-primary, #e8f1ff);
+    }
+    .animated-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+    .animated-bg::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      opacity: 0.3;
+    }
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .shape {
+      position: absolute;
+      border: 2px solid var(--neon-cyan);
+      opacity: 0.15;
+      animation: floatShape 15s infinite ease-in-out;
+    }
+    .shape1 {
+      width: 300px; height: 300px; top: 10%; left: 5%; border-radius: 50%; border-color: var(--neon-cyan); animation-delay: 0s;
+    }
+    .shape2 {
+      width: 200px; height: 200px; top: 50%; right: 10%; border-radius: 20% 80% 60% 40%/50% 30% 70% 50%; border-color: var(--neon-pink); animation-delay: -5s;
+    }
+    .shape3 {
+      width: 250px; height: 250px; bottom: 15%; left: 40%; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); border-color: var(--neon-purple); animation-delay: -10s;
+    }
+    @keyframes floatShape {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(20px, -20px) rotate(5deg); }
+      50% { transform: translate(-10px, 15px) rotate(-5deg); }
+      75% { transform: translate(15px, 5px) rotate(3deg); }
+    }
+    .maintenance-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      position: relative;
+    }
+    .maintenance-message {
+      background: var(--bg-card);
+      border: 1px solid var(--neon-cyan);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-neon-cyan);
+      padding: 2rem 3rem;
+      text-align: center;
+      animation: fadeIn 2s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .maintenance-message h1 {
+      color: var(--neon-cyan);
+      margin-bottom: 1rem;
+      text-shadow: 0 0 15px var(--neon-cyan);
+      animation: neonPulse 2s infinite alternate;
+    }
+    @keyframes neonPulse {
+      from { text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
+      to { text-shadow: 0 0 30px var(--neon-cyan), 0 0 60px var(--neon-cyan); }
+    }
+    .maintenance-message p {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      animation: fadeIn 2.5s 0.5s backwards;
+    }
+    @media (max-width: 600px) {
+      .maintenance-message {
+        padding: 1.2rem 0.5rem;
+        font-size: 0.98rem;
+        border-width: 2px;
+        max-width: 99vw;
+      }
+      .maintenance-message h1 {
+        font-size: 1.2rem;
+      }
+      .maintenance-message p {
+        font-size: 0.98rem;
+      }
+      .shape1, .shape2, .shape3 {
+        width: 100px !important;
+        height: 100px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="floating-shapes">
+    <div class="shape shape1"></div>
+    <div class="shape shape2"></div>
+    <div class="shape shape3"></div>
+  </div>
+  <div class="maintenance-container">
+    <div class="maintenance-message">
+      <h1>Site en maintenance</h1>
+      <p>Le site est actuellement en maintenance.<br>
+      Merci de revenir plus tard.</p>
+    </div>
+  </div>
+</body>
+</html>
+  </body>
+</html>

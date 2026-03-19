@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MaNote | Calculateur de Moyenne L3</title>
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+      <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+      </div>
+    </div>
+
+    <!-- Construction Notice -->
+    <div class="construction-notice">
+      <div class="construction-content">
+        <span>🚧</span>
+        <span>Site en construction - Des erreurs peuvent survenir</span>
+        <span>🚧</span>
+      </div>
+    </div>
+
+    <div class="container" id="pdf-content">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-top">
+          <div class="logo">MaNote</div>
+          <div class="header-actions">
+            <button
+              class="action-btn"
+              id="change-student-btn"
+              title="Changer de numéro étudiant"
+            >
+              🔄
+            </button>
+            <button class="action-btn" id="save-btn" title="Sauvegarder">
+              💾
+            </button>
+            <button
+              class="action-btn"
+              id="ranking-btn"
+              title="Voir le classement"
+            >
+              🏆
+            </button>
+            <button
+              class="action-btn"
+              id="clear-btn"
+              title="Effacer toutes les notes"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <div class="badge">L3 Informatique • S5A</div>
+          <h1>Calculateur de Moyenne</h1>
+          <p class="subtitle" id="subtitle">
+            Tes notes sont sauvegardées automatiquement
+          </p>
+        </div>
+      </div>
+
+      <!-- Mobile Stats Toggle Button -->
+      <button class="mobile-stats-toggle" id="mobile-stats-toggle" onclick="toggleMobileStats()">
+        <div class="mobile-stats-toggle-content">
+          <span class="mobile-stats-toggle-text">Statistiques & Simulateur</span>
+          <span class="mobile-stats-toggle-avg" id="mobile-avg-display">0.00</span>
+        </div>
+        <svg class="mobile-stats-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <!-- Collapsible Stats Container -->
+      <div class="mobile-stats-container" id="mobile-stats-container">
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+          <div class="stat-card glass">
+            <div class="stat-value cyan" id="moyenne-generale">0.00</div>
+            <div class="stat-label">Moyenne</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-value pink" id="blocs-valides">0/4</div>
+            <div class="stat-label">Blocs</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-value purple" id="ue-validees">0/8</div>
+            <div class="stat-label">UE</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="stat-value blue">27</div>
+            <div class="stat-label">Coeff</div>
+          </div>
+        </div>
+
+        <!-- Scenarios -->
+        <div class="scenarios-section">
+          <div class="scenario-card glass best">
+            <div class="scenario-header">
+              <span class="scenario-icon">🚀</span>
+              <span class="scenario-title">Meilleur scénario</span>
+            </div>
+            <div class="scenario-value" id="best-scenario">20.00</div>
+            <div class="scenario-detail" id="best-detail">20/20 partout</div>
+          </div>
+          <div class="scenario-card glass current">
+            <div class="scenario-header">
+              <span class="scenario-icon">📊</span>
+              <span class="scenario-title">Actuellement</span>
+            </div>
+            <div class="scenario-value" id="current-scenario">0.00</div>
+            <div class="scenario-detail">Vide = 0</div>
+          </div>
+          <div class="scenario-card glass worst">
+            <div class="scenario-header">
+              <span class="scenario-icon">🏆</span>
+              <span class="scenario-title">Ton classement</span>
+            </div>
+            <div class="scenario-value" id="ranking-position">--</div>
+            <div class="scenario-detail" id="ranking-detail">
+              Charge le classement
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulator -->
+        <div class="simulator-section glass">
+          <div class="simulator-header">
+            <div class="simulator-icon">🎯</div>
+            <div>
+              <div class="simulator-title">Simulateur</div>
+              <div class="simulator-subtitle">Quelle note te faut-il ?</div>
+            </div>
+          </div>
+          <div class="simulator-content">
+            <div class="sim-card">
+              <div class="sim-card-title">Pour valider (10/20)</div>
+              <div class="sim-result" id="sim-general-result">10.00</div>
+              <div class="sim-detail" id="sim-general-detail">
+                Note moyenne nécessaire
+              </div>
+            </div>
+            <div class="sim-card">
+              <div class="sim-card-title">Pour une UE</div>
+              <div class="custom-select sim-select" id="custom-ue-select">
+                <div class="custom-select-selected">Choisis une UE...</div>
+                <div class="custom-select-options">
+                  <div class="custom-select-option" data-value="ga">
+                    Graphes et algorithmes
+                  </div>
+                  <div class="custom-select-option" data-value="ps">
+                    Problem solving
+                  </div>
+                  <div class="custom-select-option" data-value="proba">
+                    Probabilités et Statistiques
+                  </div>
+                  <div class="custom-select-option" data-value="signal">
+                    Traitement du signal
+                  </div>
+                  <div class="custom-select-option" data-value="ase">
+                    Architecture des Systèmes d'Exploitation
+                  </div>
+                  <div class="custom-select-option" data-value="reseaux">
+                    Algorithmes réseaux
+                  </div>
+                  <div class="custom-select-option" data-value="bd2">
+                    Bases de données 2
+                  </div>
+                  <div class="custom-select-option" data-value="gl">
+                    Génie logiciel
+                  </div>
+                </div>
+                <input type="hidden" id="sim-ue-select" value="" />
+              </div>
+              <div class="sim-result" id="sim-ue-result" style="margin-top: 8px">
+                --
+              </div>
+              <div class="sim-detail" id="sim-ue-detail">Sélectionne une UE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blocs Grid -->
+      <div class="blocs-grid">
+        <!-- Bloc 1: Graphes -->
+        <div class="bloc-card glass">
+          <div class="bloc-header cyan">
+            <div class="bloc-title">Graphes et algorithmes</div>
+            <div>
+              <div class="bloc-moyenne cyan" id="moyenne-graphes">0.00</div>
+              <div class="bloc-coeff">Coeff 6</div>
+            </div>
+          </div>
+          <div class="bloc-content">
+            <div class="ue-item expanded" data-ue="ga">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">Graphes et algorithmes</div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-ga"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-ga">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">Écrit</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="ga"
+                    data-note="ecrit"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">TP noté</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="ga"
+                    data-note="tp"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="ue-item expanded" data-ue="ps">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">Problem solving</div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-ps"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-ps">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">Project 1</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="ps"
+                    data-note="pr1"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">Project 2</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="ps"
+                    data-note="pr2"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div
+                  class="progress-fill cyan"
+                  id="progress-graphes"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloc 2: Maths -->
+        <div class="bloc-card glass">
+          <div class="bloc-header pink">
+            <div class="bloc-title">Mathématiques</div>
+            <div>
+              <div class="bloc-moyenne pink" id="moyenne-maths">0.00</div>
+              <div class="bloc-coeff">Coeff 6</div>
+            </div>
+          </div>
+          <div class="bloc-content">
+            <div class="ue-item expanded" data-ue="proba">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">Probabilités et Statistiques</div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-proba"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-proba">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">TP noté</span>
+                  <span class="note-coeff">×2</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="proba"
+                    data-note="tp"
+                    data-coeff="2"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">Écrit</span>
+                  <span class="note-coeff">×3</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="proba"
+                    data-note="ecrit"
+                    data-coeff="3"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">QCM</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="proba"
+                    data-note="qcm"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="ue-item expanded" data-ue="signal">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">Traitement du signal</div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-signal"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-signal">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">Écrit 1</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="signal"
+                    data-note="ecrit1"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">Écrit 2</span>
+                  <span class="note-coeff">×2</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="signal"
+                    data-note="ecrit2"
+                    data-coeff="2"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div
+                  class="progress-fill pink"
+                  id="progress-maths"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloc 3: Architecture -->
+        <div class="bloc-card glass">
+          <div class="bloc-header purple">
+            <div class="bloc-title">Architecture systèmes et réseaux</div>
+            <div>
+              <div class="bloc-moyenne purple" id="moyenne-archi">0.00</div>
+              <div class="bloc-coeff">Coeff 9</div>
+            </div>
+          </div>
+          <div class="bloc-content">
+            <div class="ue-item expanded" data-ue="ase">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">
+                    Architecture des Systèmes d'Exploitation
+                  </div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-ase"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-ase">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">QCM</span>
+                  <span class="note-coeff">×3</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="ase"
+                    data-note="qcm"
+                    data-coeff="3"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">TP noté</span>
+                  <span class="note-coeff">×3</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="ase"
+                    data-note="tp"
+                    data-coeff="3"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">Écrit</span>
+                  <span class="note-coeff">×3</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="ase"
+                    data-note="ecrit"
+                    data-coeff="3"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="ue-item expanded" data-ue="reseaux">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">Algorithmes réseaux</div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-reseaux"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-reseaux">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">TP noté</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="reseaux"
+                    data-note="tp"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">Écrit</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="reseaux"
+                    data-note="ecrit"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div
+                  class="progress-fill purple"
+                  id="progress-archi"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloc 4: BDD -->
+        <div class="bloc-card glass">
+          <div class="bloc-header blue">
+            <div class="bloc-title">BDD et Génie logiciel</div>
+            <div>
+              <div class="bloc-moyenne blue" id="moyenne-bdd">0.00</div>
+              <div class="bloc-coeff">Coeff 6</div>
+            </div>
+          </div>
+          <div class="bloc-content">
+            <div class="ue-item expanded" data-ue="bd2">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">Bases de données 2</div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-bd2"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-bd2">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">Écrit</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="bd2"
+                    data-note="projet"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">Projet</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="bd2"
+                    data-note="ecrit"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="ue-item expanded" data-ue="gl">
+              <div class="ue-header" onclick="toggleUE(this)">
+                <div class="ue-info">
+                  <div class="ue-name">Génie logiciel</div>
+                  <span
+                    class="validation-badge not-validated"
+                    id="validation-gl"
+                    >Non validée</span
+                  >
+                </div>
+                <div class="ue-moyenne" id="moyenne-gl">0.00</div>
+                <button class="toggle-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="notes-grid">
+                <div class="note-input-group">
+                  <span class="note-label">TP note</span>
+                  <span class="note-coeff">×1</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="gl"
+                    data-note="projet"
+                    data-coeff="1"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+                <div class="note-input-group">
+                  <span class="note-label">Écrit</span>
+                  <span class="note-coeff">×2</span>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="note-input"
+                    data-ue="gl"
+                    data-note="ecrit"
+                    data-coeff="2"
+                    min="0"
+                    max="20"
+                    step="0.25"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div
+                  class="progress-fill blue"
+                  id="progress-bdd"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>MaNote - Made with ❤️ by aldothedev</footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+      <span class="toast-icon">✓</span>
+      <span id="toast-message">Sauvegardé !</span>
+    </div>
+
+    <!-- Celebration Modal -->
+    <div class="celebration-overlay" id="celebration">
+      <div class="celebration-content">
+        <div>
+          <span class="celebration-emoji">🎉</span>
+          <span class="celebration-emoji">🎊</span>
+          <span class="celebration-emoji">🎉</span>
+        </div>
+        <div class="celebration-title">Félicitations !</div>
+        <div class="celebration-subtitle">Tu as validé ton semestre !</div>
+        <div class="celebration-average" id="celebration-average">10.00/20</div>
+        <button class="celebration-close" onclick="closeCelebration()">
+          Super ! 🚀
+        </button>
+      </div>
+    </div>
+
+    <!-- Clear Confirmation Modal -->
+    <div class="modal-overlay" id="clear-modal">
+      <div class="modal-content">
+        <div class="modal-icon">🗑️</div>
+        <div class="modal-title">Effacer toutes les notes ?</div>
+        <div class="modal-subtitle">
+          Cette action est irréversible. Toutes tes notes seront perdues.
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeClearModal()">
+            Annuler
+          </button>
+          <button class="modal-btn confirm" onclick="confirmClearNotes()">
+            Effacer tout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Welcome Modal -->
+    <div class="modal-overlay" id="welcome-modal">
+      <div class="modal-content welcome-content">
+        <div class="welcome-header">
+          <div class="welcome-emoji">👋</div>
+          <div class="welcome-title">Bonjour !</div>
+        </div>
+        <div class="welcome-message">
+          Bienvenue sur <span class="highlight">MaNote</span>, ton calculateur
+          de moyenne personnalisé.
+        </div>
+        <div class="welcome-instruction">
+          Pour commencer, entre ton <strong>numéro d'étudiant</strong> afin
+          d'importer automatiquement tes notes disponibles.
+        </div>
+        <div class="student-input-container">
+          <input
+            type="text"
+            id="student-number-input"
+            class="student-input modern"
+            placeholder="Ex: 22308265"
+            maxlength="8"
+          />
+          <div class="input-hint">8 chiffres</div>
+        </div>
+        <div class="modal-actions welcome-actions">
+          <button class="modal-btn secondary" onclick="skipWelcome()">
+            Passer pour l'instant
+          </button>
+          <button
+            class="modal-btn primary"
+            onclick="importGradesFromSupabase()"
+          >
+            <span class="btn-text">C'est parti !</span>
+            <span class="btn-icon">🚀</span>
+          </button>
+        </div>
+        <div class="welcome-footer">
+          Tes notes sont sauvegardées localement et en sécurité
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal-overlay" id="loading-modal">
+      <div class="loading-content">
+        <div class="loading-text" id="loading-text">
+          Récupération de tes notes...
+        </div>
+        <div class="progress-container-loading">
+          <div class="progress-bar-loading">
+            <div class="progress-fill-loading" id="progress-fill"></div>
+          </div>
+          <div class="progress-percentage" id="progress-percentage">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ranking Modal -->
+    <div class="modal-overlay" id="ranking-modal">
+      <div class="modal-content ranking-content">
+        <div class="ranking-header">
+          <div class="ranking-icon">🏆</div>
+          <div>
+            <div class="ranking-title">Classement de la classe</div>
+            <div class="ranking-subtitle">Top 10 des meilleures moyennes</div>
+          </div>
+          <input
+            type="text"
+            id="ranking-search"
+            class="ranking-search"
+            placeholder="Rechercher par nom ou numéro..."
+            autocomplete="off"
+            style="
+              margin: 16px auto 0;
+              max-width: 320px;
+              width: 90%;
+              display: block;
+            "
+          />
+          <button class="modal-close" onclick="closeRankingModal()">✕</button>
+        </div>
+        <div class="ranking-content-scroll" id="ranking-list">
+          <div class="ranking-loading">Chargement du classement...</div>
+        </div>
+        <div class="ranking-footer" id="ranking-footer"></div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/supabase-config.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

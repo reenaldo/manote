@@ -1,0 +1,33 @@
+# Dependencies
+
+
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+
+# Netlify
+.netlify/
+netlify/functions/node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Server (if using separate backend)
+server/node_modules/
+server/.env
+admin/
