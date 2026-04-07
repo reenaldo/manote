@@ -71,6 +71,199 @@ const noteFieldCoeffs = {
   gl: { projet: 1, ecrit: 2 },
 };
 
+// ===== S6 CONFIGURATION =====
+let currentSemester = "S5";
+let s5Moyenne = 0; // stored whenever S5 is active, used for L3 calculation
+let hasShownLicenceCelebration = false;
+
+const s6Choices = {
+  info_opt: "reseaux_loc",
+  ouv_opt: "droit",
+};
+
+const noteFieldCoeffsS6 = {
+  // UE Théorie des langages
+  tdl: { ecrit1: 1, ecrit2: 1, ecrit3: 2 },
+  // UE Projet intégrateur
+  projet_s6: { projet: 1 },
+  // UE Informatique — matières fixes
+  ihm: { oral: 1, rendus: 1, realisation: 2 },
+  ia: { ecrit: 3, projet: 2 },
+  // UE Informatique — matière au choix
+  reseaux_loc: { ecrit: 1, rendu: 1 },
+  geo3d: { tp: 2, ecrit: 3 },
+  mobile: { rendu: 2, ecrit: 3 },
+  // UE Ouverture — matière fixe
+  // methodo: écrit ×3, quizz_moy ×2 → scaled: ecrit:9, quizz1:2, quizz2:2, quizz3:2 (total 15)
+  methodo: { ecrit: 9, quizz1: 2, quizz2: 2, quizz3: 2 },
+  // UE Ouverture — matière au choix
+  droit: { assiduite: 2, ecrit1: 9, ecrit2: 9 },
+  mediation: { rapport: 1, soutenance: 1 },
+  // Langue — non comptabilisée dans la moyenne générale (éval par niveau)
+};
+
+function getS6BlocsConfig() {
+  const infoOpt = s6Choices.info_opt;
+  const ouvOpt = s6Choices.ouv_opt;
+  return {
+    tdl: { coeff: 6, ues: ["tdl"], ueCoeffs: { tdl: 1 } },
+    projet_s6: { coeff: 6, ues: ["projet_s6"], ueCoeffs: { projet_s6: 1 } },
+    info_s6: {
+      coeff: 9,
+      ues: ["ihm", "ia", infoOpt],
+      ueCoeffs: { ihm: 1, ia: 1, [infoOpt]: 1 },
+    },
+    ouverture_s6: {
+      coeff: 6,
+      ues: ["methodo", ouvOpt],
+      ueCoeffs: { methodo: 1, [ouvOpt]: 1 },
+    },
+    // langue_s6 exclue du calcul (évaluation par niveau uniquement)
+  };
+}
+
+function getActiveBlocsConfig() {
+  return currentSemester === "S6" ? getS6BlocsConfig() : blocsConfig;
+}
+
+// ===== L3 TRACKER =====
+function updateL3Tracker(s6Average) {
+  const neededEl = document.getElementById("l3-needed");
+  const statusEl = document.getElementById("l3-status");
+  if (!neededEl || !statusEl) return;
+
+  if (s5Moyenne === 0) {
+    neededEl.textContent = "—";
+    statusEl.textContent = "Importe tes notes S5 d'abord";
+    statusEl.className = "l3-status pending";
+    return;
+  }
+
+  const needed = 20 - s5Moyenne;
+  const l3Average = (s5Moyenne + s6Average) / 2;
+
+  neededEl.textContent = needed <= 0 ? "0.00 ✓" : needed.toFixed(2);
+
+  if (l3Average >= 10) {
+    statusEl.textContent = `✓ Licence validée ! (moy. L3 : ${l3Average.toFixed(2)})`;
+    statusEl.className = "l3-status achieved";
+    checkLicenceCelebration(s6Average, l3Average);
+  } else if (needed > 20) {
+    statusEl.textContent = `Score S5 insuffisant (moy. L3 actuelle : ${l3Average.toFixed(2)})`;
+    statusEl.className = "l3-status impossible";
+  } else {
+    statusEl.textContent = `Moy. L3 actuelle : ${l3Average.toFixed(2)}/20`;
+    statusEl.className = "l3-status pending";
+  }
+}
+
+function checkLicenceCelebration(s6Avg, l3Avg) {
+  if (hasShownLicenceCelebration) return;
+  // Only trigger if student has actually entered some S6 notes
+  const hasS6Notes = Array.from(
+    document.querySelectorAll("#s6-content .note-input")
+  ).some((i) => i.value !== "");
+  if (!hasS6Notes) return;
+
+  hasShownLicenceCelebration = true;
+  setTimeout(() => {
+    const overlay = document.getElementById("licence-celebration");
+    if (overlay && !overlay.classList.contains("show")) {
+      document.getElementById("lic-s5-val").textContent = s5Moyenne.toFixed(2) + "/20";
+      document.getElementById("lic-s6-val").textContent = s6Avg.toFixed(2) + "/20";
+      document.getElementById("lic-l3-val").textContent = l3Avg.toFixed(2) + "/20";
+      overlay.classList.add("show");
+      createConfetti();
+    }
+  }, 400);
+}
+
+window.closeLicenceCelebration = function () {
+  const overlay = document.getElementById("licence-celebration");
+  if (overlay) overlay.classList.remove("show");
+};
+
+// ===== SEMESTER SWITCH =====
+window.switchSemester = function (sem) {
+  currentSemester = sem;
+
+  document.getElementById("tab-s5").classList.toggle("active", sem === "S5");
+  document.getElementById("tab-s6").classList.toggle("active", sem === "S6");
+
+  const s5Content = document.getElementById("s5-content");
+  const s6Content = document.getElementById("s6-content");
+  if (s5Content) s5Content.style.display = sem === "S5" ? "" : "none";
+  if (s6Content) s6Content.style.display = sem === "S6" ? "" : "none";
+
+  const badge = document.getElementById("semester-badge");
+  if (badge) badge.textContent = sem === "S5" ? "L3 Informatique • S5A" : "L3 Informatique • S6A";
+
+  updateSimulatorUEOptions();
+  updateAll();
+};
+
+// ===== S6 CHOICE SELECTION =====
+window.selectS6Choice = function (group, choice, btn) {
+  s6Choices[group] = choice;
+
+  // Update tab highlight
+  const choiceSection = btn.closest(".choice-section");
+  choiceSection.querySelectorAll(".choice-tab").forEach((t) => t.classList.remove("active"));
+  btn.classList.add("active");
+
+  // Show/hide choice content panels
+  choiceSection.querySelectorAll(".choice-content").forEach((c) => c.classList.remove("active"));
+  const panel = choiceSection.querySelector(`.choice-content[data-choice="${choice}"]`);
+  if (panel) panel.classList.add("active");
+
+  updateSimulatorUEOptions();
+  updateAll();
+};
+
+// ===== SIMULATOR UE OPTIONS =====
+function updateSimulatorUEOptions() {
+  const customSelect = document.getElementById("custom-ue-select");
+  if (!customSelect) return;
+  const optionsContainer = customSelect.querySelector(".custom-select-options");
+  const selected = customSelect.querySelector(".custom-select-selected");
+  const hiddenInput = customSelect.querySelector("input[type='hidden']");
+  if (!optionsContainer || !selected || !hiddenInput) return;
+
+  // Reset selection
+  selected.textContent = "Choisis une UE...";
+  hiddenInput.value = "";
+
+  let optionsHTML = "";
+  if (currentSemester === "S5") {
+    optionsHTML = `
+      <div class="custom-select-option" data-value="ga">Graphes et algorithmes</div>
+      <div class="custom-select-option" data-value="ps">Problem solving</div>
+      <div class="custom-select-option" data-value="proba">Probabilités et Statistiques</div>
+      <div class="custom-select-option" data-value="signal">Traitement du signal</div>
+      <div class="custom-select-option" data-value="ase">Architecture des Systèmes d'Exploitation</div>
+      <div class="custom-select-option" data-value="reseaux">Algorithmes réseaux</div>
+      <div class="custom-select-option" data-value="bd2">Bases de données 2</div>
+      <div class="custom-select-option" data-value="gl">Génie logiciel</div>
+    `;
+  } else {
+    const infoOptLabel =
+      s6Choices.info_opt === "reseaux_loc" ? "Réseaux locaux" :
+      s6Choices.info_opt === "geo3d" ? "Géométrie pour la 3D" : "Programmation mobile";
+    const ouvOptLabel = s6Choices.ouv_opt === "droit" ? "Droit" : "Médiation scientifique";
+    optionsHTML = `
+      <div class="custom-select-option" data-value="tdl">Théorie des langages</div>
+      <div class="custom-select-option" data-value="projet_s6">Projet intégrateur</div>
+      <div class="custom-select-option" data-value="ihm">Interaction hommes-machines</div>
+      <div class="custom-select-option" data-value="ia">Intelligence artificielle</div>
+      <div class="custom-select-option" data-value="${s6Choices.info_opt}">${infoOptLabel}</div>
+      <div class="custom-select-option" data-value="methodo">Méthodologie scientifique</div>
+      <div class="custom-select-option" data-value="${s6Choices.ouv_opt}">${ouvOptLabel}</div>
+    `;
+  }
+  optionsContainer.innerHTML = optionsHTML;
+  setupCustomSelect();
+}
+
 // Celebration constants
 const CONFETTI_COUNT = 50;
 const CONFETTI_ANIMATION_DELAY_MAX = 2; // seconds
@@ -141,6 +334,8 @@ window.confirmClearNotes = function () {
   localStorage.removeItem("manote-student-number");
   localStorage.removeItem("manote-welcome-skipped");
   hasShownCelebration = false;
+  hasShownLicenceCelebration = false;
+  s5Moyenne = 0;
   updateAll();
   updateSubtitle("");
   window.closeClearModal();
@@ -629,7 +824,7 @@ function calcUE(ueCode) {
 }
 
 function calcBloc(blocCode) {
-  const config = blocsConfig[blocCode];
+  const config = getActiveBlocsConfig()[blocCode];
   let points = 0;
   let coeff = 0;
   config.ues.forEach((ueCode) => {
@@ -640,22 +835,24 @@ function calcBloc(blocCode) {
 }
 
 function calcGeneral() {
+  const config = getActiveBlocsConfig();
   let points = 0;
   let coeff = 0;
-  Object.keys(blocsConfig).forEach((blocCode) => {
-    points += calcBloc(blocCode) * blocsConfig[blocCode].coeff;
-    coeff += blocsConfig[blocCode].coeff;
+  Object.keys(config).forEach((blocCode) => {
+    points += calcBloc(blocCode) * config[blocCode].coeff;
+    coeff += config[blocCode].coeff;
   });
   return coeff > 0 ? points / coeff : 0;
 }
 
 // ===== SCENARIOS =====
 function calcScenario(defaultValue) {
+  const activeConfig = getActiveBlocsConfig();
   let points = 0;
   let coeff = 0;
 
-  Object.keys(blocsConfig).forEach((blocCode) => {
-    const config = blocsConfig[blocCode];
+  Object.keys(activeConfig).forEach((blocCode) => {
+    const config = activeConfig[blocCode];
     let blocPoints = 0;
     let blocCoeff = 0;
 
@@ -907,12 +1104,20 @@ function checkCelebration(average) {
 
 // ===== UPDATE ALL =====
 function updateAll() {
+  const activeConfig = getActiveBlocsConfig();
   let ueValidated = 0;
   let blocsValidated = 0;
+  let totalUECount = 0;
+  let totalBlocCount = Object.keys(activeConfig).length;
+  let totalCoeff = 0;
 
-  // Update UE
-  Object.keys(blocsConfig).forEach((blocCode) => {
-    blocsConfig[blocCode].ues.forEach((ueCode) => {
+  // Update UE and blocs
+  Object.keys(activeConfig).forEach((blocCode) => {
+    const bloc = activeConfig[blocCode];
+    totalUECount += bloc.ues.length;
+    totalCoeff += bloc.coeff;
+
+    bloc.ues.forEach((ueCode) => {
       const avg = calcUE(ueCode);
       const moyenneEl = document.getElementById(`moyenne-${ueCode}`);
       const badge = document.getElementById(`validation-${ueCode}`);
@@ -958,6 +1163,7 @@ function updateAll() {
   const moyenneGeneraleEl = document.getElementById("moyenne-generale");
   const blocsValidesEl = document.getElementById("blocs-valides");
   const ueValideesEl = document.getElementById("ue-validees");
+  const totalCoeffEl = document.getElementById("total-coeff");
 
   if (moyenneGeneraleEl) {
     moyenneGeneraleEl.textContent = generalAverage.toFixed(2);
@@ -967,11 +1173,37 @@ function updateAll() {
   updateMobileAvgDisplay(generalAverage);
 
   if (blocsValidesEl) {
-    blocsValidesEl.textContent = `${blocsValidated}/4`;
+    blocsValidesEl.textContent = `${blocsValidated}/${totalBlocCount}`;
   }
 
   if (ueValideesEl) {
-    ueValideesEl.textContent = `${ueValidated}/8`;
+    ueValideesEl.textContent = `${ueValidated}/${totalUECount}`;
+  }
+
+  if (totalCoeffEl) {
+    totalCoeffEl.textContent = totalCoeff;
+  }
+
+  // S5 results display (read-only) + store S5 moyenne for L3 tracker
+  if (currentSemester === "S5") {
+    s5Moyenne = generalAverage;
+    ["graphes", "maths", "archi", "bdd"].forEach((bloc) => {
+      const avg = calcBloc(bloc);
+      const moyEl = document.getElementById(`s5-moy-${bloc}`);
+      const validEl = document.getElementById(`s5-valid-${bloc}`);
+      if (moyEl) moyEl.textContent = avg.toFixed(2);
+      if (validEl) {
+        validEl.textContent = avg >= 10 ? "Validé ✓" : "Non validé";
+        validEl.className = `validation-badge ${avg >= 10 ? "validated" : "not-validated"}`;
+      }
+    });
+    const s5Final = document.getElementById("s5-moy-generale");
+    if (s5Final) s5Final.textContent = generalAverage.toFixed(2);
+  }
+
+  // S6: update L3 tracker
+  if (currentSemester === "S6") {
+    updateL3Tracker(generalAverage);
   }
 
   // Check for celebration
