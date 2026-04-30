@@ -1636,7 +1636,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize
   // DO NOT load notes from localStorage - this is a shared device, only load from database
-  // loadNotes();
+  loadNotes();
   updateAll();
   setupStudentInputEnter();
   setupCustomSelect();
@@ -1651,13 +1651,5 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== PRIVACY PROTECTION =====
   // Clear notes when page unloads (tab closed, browser closed, navigation away)
   // This prevents other users on the same device from seeing previous student's notes
-  window.addEventListener("beforeunload", () => {
-    // Clear ALL sensitive data from localStorage
-    localStorage.clear();
-
-    // Clear input fields
-    document.querySelectorAll(".note-input").forEach((input) => {
-      input.value = "";
-    });
-  });
-});
+ // window.addEventListener("beforeunload", () => { ... });
+// (désactivé : on garde les notes entre les sessions)
