@@ -1651,5 +1651,5 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== PRIVACY PROTECTION =====
   // Clear notes when page unloads (tab closed, browser closed, navigation away)
   // This prevents other users on the same device from seeing previous student's notes
- // window.addEventListener("beforeunload", () => { ... });
-// (désactivé : on garde les notes entre les sessions)
+  // beforeunload cleanup disabled: keep notes between sessions.
+});
