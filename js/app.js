@@ -585,18 +585,22 @@ async function calculateStudentAverage(studentNumber, semester = "S5") {
     const hasAnySemesterGrade = semesterUEs.some((ue) => ueAverages[ue] !== undefined);
     if (!hasAnySemesterGrade) return null;
 
-    // Calculate general average
+    // Calculate general average (only count UEs/blocs where the student has grades)
     let totalPoints = 0, totalCoeff = 0;
     Object.keys(activeConfig).forEach((blocCode) => {
       const config = activeConfig[blocCode];
       let blocPoints = 0, blocCoeff = 0;
       config.ues.forEach((ue) => {
-        blocPoints += (ueAverages[ue] || 0) * (config.ueCoeffs[ue] || 1);
-        blocCoeff += config.ueCoeffs[ue] || 1;
+        if (ueAverages[ue] !== undefined) {
+          blocPoints += ueAverages[ue] * (config.ueCoeffs[ue] || 1);
+          blocCoeff += config.ueCoeffs[ue] || 1;
+        }
       });
-      const blocAvg = blocCoeff > 0 ? blocPoints / blocCoeff : 0;
-      totalPoints += blocAvg * config.coeff;
-      totalCoeff += config.coeff;
+      if (blocCoeff > 0) {
+        const blocAvg = blocPoints / blocCoeff;
+        totalPoints += blocAvg * config.coeff;
+        totalCoeff += config.coeff;
+      }
     });
 
     const generalAverage = totalCoeff > 0 ? totalPoints / totalCoeff : 0;
@@ -686,20 +690,22 @@ async function loadAndDisplayRanking() {
       return null;
     });
 
-    // Add students with no grades
-    const studentsWithoutGrades = allStudents.filter(
-      (s) => !studentsWithGrades.includes(s.student_number),
-    );
-    studentsWithoutGrades.forEach((s) => {
-      studentAverages.push({
-        studentNumber: s.student_number,
-        firstName: s.first_name,
-        lastName: s.last_name,
-        average: 0,
-        isCurrent: s.student_number === currentStudentNumber,
-        hasGrade: false,
+    // Add students with no grades (S5 only — for S6, skip them as grades may not be uploaded yet)
+    if (currentSemester !== "S6") {
+      const studentsWithoutGrades = allStudents.filter(
+        (s) => !studentsWithGrades.includes(s.student_number),
+      );
+      studentsWithoutGrades.forEach((s) => {
+        studentAverages.push({
+          studentNumber: s.student_number,
+          firstName: s.first_name,
+          lastName: s.last_name,
+          average: 0,
+          isCurrent: s.student_number === currentStudentNumber,
+          hasGrade: false,
+        });
       });
-    });
+    }
 
     const results = await Promise.all(averagePromises);
     results.forEach((student) => {
