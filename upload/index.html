@@ -384,6 +384,7 @@
       function parseLines(lines) {
         let ueName = null;
         let columns = [];
+        let columnCoeffs = [];
         const rows = [];
 
         for (const line of lines) {
@@ -402,10 +403,11 @@
           ) {
             // Strip the leading "N°" before extracting column names
             const headerPart = line.replace(/^N[°o]?\s*/i, "");
-            const colRx = /\*?(.+?)\s*\(coef\s*[\d.]+\)/g;
+            const colRx = /\*?(.+?)\s*\(coef\s*([\d.]+)\)/g;
             let m;
             while ((m = colRx.exec(headerPart)) !== null) {
               columns.push(m[1].trim().replace(/^\*+\s*/, ""));
+              columnCoeffs.push(parseFloat(m[2]) || 1);
             }
           }
 
@@ -417,7 +419,7 @@
           }
         }
 
-        return { ueName, columns, rows };
+        return { ueName, columns, columnCoeffs, rows };
       }
 
       // ===== STATE =====
@@ -429,7 +431,7 @@
 
         try {
           const lines = await extractLines(file);
-          const { ueName, columns, rows } = parseLines(lines);
+          const { ueName, columns, columnCoeffs, rows } = parseLines(lines);
 
           if (!ueName)
             throw new Error(
@@ -459,7 +461,7 @@
             })
             .filter((s) => Object.keys(s.grades).length > 0);
 
-          parsedData = { ueName, ueCode, columns, noteFields, students };
+          parsedData = { ueName, ueCode, columns, columnCoeffs, noteFields, students };
 
           document.getElementById("upload-zone").style.display = "none";
           renderDetection();
@@ -534,16 +536,19 @@
         progressWrap.style.display = "";
 
         try {
-          // Build all grade records
+          // Build all grade records (with coefficient from the PDF)
           const records = [];
           parsedData.students.forEach(({ studentNumber, grades }) => {
-            Object.entries(grades).forEach(([noteField, grade]) => {
-              records.push({
-                student_number: studentNumber,
-                ue: parsedData.ueCode,
-                note_field: noteField,
-                grade,
-              });
+            parsedData.noteFields.forEach((noteField, i) => {
+              if (grades[noteField] !== undefined) {
+                records.push({
+                  student_number: studentNumber,
+                  ue: parsedData.ueCode,
+                  note_field: noteField,
+                  grade: grades[noteField],
+                  coeff: parsedData.columnCoeffs[i],
+                });
+              }
             });
           });
 

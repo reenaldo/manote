@@ -509,14 +509,14 @@ window.loadStudentFromRanking = async function (studentNumber) {
 function detectStudentS6Choices(gradesByUE) {
   let info_opt = "reseaux_loc";
   for (const choice of ["reseaux_loc", "geo3d", "mobile"]) {
-    if (gradesByUE[choice] && Object.keys(gradesByUE[choice]).length > 0) {
+    if (gradesByUE[choice] && gradesByUE[choice].length > 0) {
       info_opt = choice;
       break;
     }
   }
   let ouv_opt = "droit";
   for (const choice of ["droit", "mediation"]) {
-    if (gradesByUE[choice] && Object.keys(gradesByUE[choice]).length > 0) {
+    if (gradesByUE[choice] && gradesByUE[choice].length > 0) {
       ouv_opt = choice;
       break;
     }
@@ -525,86 +525,92 @@ function detectStudentS6Choices(gradesByUE) {
 }
 
 // Calculate average for a specific student number (S5 or S6)
+// Compute a student's semester average from pre-fetched grade records (no API call)
+function computeStudentAverage(records, semester) {
+  if (!records || records.length === 0) return null;
+
+  // JS config coefficients as fallback when DB has no coeff stored
+  const activeNoteFieldCoeffs = semester === "S6" ? noteFieldCoeffsS6 : noteFieldCoeffs;
+
+  // Group by UE, keeping note_field for config fallback
+  const gradesByUE = {};
+  records.forEach((record) => {
+    if (!gradesByUE[record.ue]) gradesByUE[record.ue] = [];
+    gradesByUE[record.ue].push({
+      noteField: record.note_field,
+      grade: parseFloat(record.grade) || 0,
+      dbCoeff: parseFloat(record.coeff) || null,
+    });
+  });
+
+  // Determine active bloc config
+  let activeConfig;
+  if (semester === "S6") {
+    const { info_opt, ouv_opt } = detectStudentS6Choices(gradesByUE);
+    activeConfig = {
+      tdl: { coeff: 6, ues: ["tdl"], ueCoeffs: { tdl: 1 } },
+      projet_s6: { coeff: 6, ues: ["projet_s6"], ueCoeffs: { projet_s6: 1 } },
+      info_s6: {
+        coeff: 9,
+        ues: ["ihm", "ia", info_opt],
+        ueCoeffs: { ihm: 1, ia: 1, [info_opt]: 1 },
+      },
+      ouverture_s6: {
+        coeff: 6,
+        ues: ["methodo", ouv_opt],
+        ueCoeffs: { methodo: 1, [ouv_opt]: 1 },
+      },
+    };
+  } else {
+    activeConfig = blocsConfig;
+  }
+
+  // UE averages — use DB coeff if stored, else fall back to JS config coeff
+  const ueAverages = {};
+  Object.entries(gradesByUE).forEach(([ue, entries]) => {
+    const configCoeffs = activeNoteFieldCoeffs[ue] || {};
+    let points = 0, totalCoeff = 0;
+    entries.forEach(({ noteField, grade, dbCoeff }) => {
+      const coeff = dbCoeff !== null ? dbCoeff : (configCoeffs[noteField] || 1);
+      points += grade * coeff;
+      totalCoeff += coeff;
+    });
+    if (totalCoeff > 0) ueAverages[ue] = points / totalCoeff;
+  });
+
+  // Must have at least one grade for this semester's UEs
+  const semesterUEs = Object.values(activeConfig).flatMap((c) => c.ues);
+  if (!semesterUEs.some((ue) => ueAverages[ue] !== undefined)) return null;
+
+  // General average (only count blocs/UEs with grades)
+  let totalPoints = 0, totalCoeff = 0;
+  Object.keys(activeConfig).forEach((blocCode) => {
+    const config = activeConfig[blocCode];
+    let blocPoints = 0, blocCoeff = 0;
+    config.ues.forEach((ue) => {
+      if (ueAverages[ue] !== undefined) {
+        blocPoints += ueAverages[ue] * (config.ueCoeffs[ue] || 1);
+        blocCoeff += config.ueCoeffs[ue] || 1;
+      }
+    });
+    if (blocCoeff > 0) {
+      totalPoints += (blocPoints / blocCoeff) * config.coeff;
+      totalCoeff += config.coeff;
+    }
+  });
+
+  return totalCoeff > 0 ? Math.max(0, Math.min(20, totalPoints / totalCoeff)) : null;
+}
+
 async function calculateStudentAverage(studentNumber, semester = "S5") {
   if (!window.supabaseClient) return null;
-
   try {
     const { data, error } = await window.supabaseClient
       .from(window.GRADES_TABLE)
       .select("*")
       .eq("student_number", studentNumber);
-
-    if (error || !data || data.length === 0) return null;
-
-    // Organize grades by UE and note_field
-    const gradesByUE = {};
-    data.forEach((record) => {
-      if (!gradesByUE[record.ue]) gradesByUE[record.ue] = {};
-      gradesByUE[record.ue][record.note_field] = parseFloat(record.grade) || 0;
-    });
-
-    // Pick the right config for the semester
-    let activeNoteFieldCoeffs, activeConfig;
-    if (semester === "S6") {
-      activeNoteFieldCoeffs = noteFieldCoeffsS6;
-      const { info_opt, ouv_opt } = detectStudentS6Choices(gradesByUE);
-      activeConfig = {
-        tdl: { coeff: 6, ues: ["tdl"], ueCoeffs: { tdl: 1 } },
-        projet_s6: { coeff: 6, ues: ["projet_s6"], ueCoeffs: { projet_s6: 1 } },
-        info_s6: {
-          coeff: 9,
-          ues: ["ihm", "ia", info_opt],
-          ueCoeffs: { ihm: 1, ia: 1, [info_opt]: 1 },
-        },
-        ouverture_s6: {
-          coeff: 6,
-          ues: ["methodo", ouv_opt],
-          ueCoeffs: { methodo: 1, [ouv_opt]: 1 },
-        },
-      };
-    } else {
-      activeNoteFieldCoeffs = noteFieldCoeffs;
-      activeConfig = blocsConfig;
-    }
-
-    // Calculate UE averages
-    const ueAverages = {};
-    Object.keys(gradesByUE).forEach((ue) => {
-      const notes = gradesByUE[ue];
-      const coeffs = activeNoteFieldCoeffs[ue] || {};
-      let points = 0, coeff = 0;
-      Object.keys(coeffs).forEach((noteField) => {
-        points += (notes[noteField] || 0) * (coeffs[noteField] || 1);
-        coeff += coeffs[noteField] || 1;
-      });
-      ueAverages[ue] = coeff > 0 ? points / coeff : 0;
-    });
-
-    // If the student has no grades for this semester's UE codes, exclude them
-    const semesterUEs = Object.values(activeConfig).flatMap((c) => c.ues);
-    const hasAnySemesterGrade = semesterUEs.some((ue) => ueAverages[ue] !== undefined);
-    if (!hasAnySemesterGrade) return null;
-
-    // Calculate general average (only count UEs/blocs where the student has grades)
-    let totalPoints = 0, totalCoeff = 0;
-    Object.keys(activeConfig).forEach((blocCode) => {
-      const config = activeConfig[blocCode];
-      let blocPoints = 0, blocCoeff = 0;
-      config.ues.forEach((ue) => {
-        if (ueAverages[ue] !== undefined) {
-          blocPoints += ueAverages[ue] * (config.ueCoeffs[ue] || 1);
-          blocCoeff += config.ueCoeffs[ue] || 1;
-        }
-      });
-      if (blocCoeff > 0) {
-        const blocAvg = blocPoints / blocCoeff;
-        totalPoints += blocAvg * config.coeff;
-        totalCoeff += config.coeff;
-      }
-    });
-
-    const generalAverage = totalCoeff > 0 ? totalPoints / totalCoeff : 0;
-    return Math.max(0, Math.min(20, generalAverage));
+    if (error || !data) return null;
+    return computeStudentAverage(data, semester);
   } catch (error) {
     console.error("Error calculating student average:", error);
     return null;
@@ -627,36 +633,29 @@ async function loadAndDisplayRanking() {
     '<div class="ranking-loading">Chargement du classement...</div>';
 
   try {
-    // Get all unique student numbers from grades
-    const { data: allGrades, error } = await window.supabaseClient
-      .from(window.GRADES_TABLE)
-      .select("student_number");
+    // Fetch all grades + all students in parallel (single round-trip)
+    const [gradesResult, studentsResult] = await Promise.all([
+      window.supabaseClient.from(window.GRADES_TABLE).select("*"),
+      window.supabaseClient.from("students").select("student_number, first_name, last_name"),
+    ]);
 
-    if (error || !allGrades) {
+    if (gradesResult.error || studentsResult.error || !studentsResult.data) {
       rankingList.innerHTML =
         '<div class="ranking-error">❌ Erreur lors du chargement</div>';
       return;
     }
 
-    // Get all students from students table
-    const { data: allStudents, error: studentsError } =
-      await window.supabaseClient
-        .from("students")
-        .select("student_number, first_name, last_name");
+    const allGrades = gradesResult.data || [];
+    const allStudents = studentsResult.data;
 
-    if (studentsError || !allStudents) {
-      rankingList.innerHTML =
-        '<div class="ranking-error">❌ Erreur chargement étudiants</div>';
-      return;
-    }
+    // Group grade records by student number
+    const gradesByStudent = {};
+    allGrades.forEach((record) => {
+      if (!gradesByStudent[record.student_number]) gradesByStudent[record.student_number] = [];
+      gradesByStudent[record.student_number].push(record);
+    });
 
-    // Get unique student numbers from grades
-    const studentsWithGrades = [
-      ...new Set(allGrades.map((g) => g.student_number)),
-    ];
-    const allStudentNumbers = allStudents.map((s) => s.student_number);
-
-    // Update ranking modal subtitle to reflect current semester
+    // Update ranking modal subtitle
     const rankingSubtitle = document.querySelector(".ranking-subtitle");
     if (rankingSubtitle) {
       rankingSubtitle.textContent = currentSemester === "S6"
@@ -664,55 +663,20 @@ async function loadAndDisplayRanking() {
         : "Classement Semestre 5";
     }
 
-    // Calculate averages for all students with grades
-    const studentAverages = [];
-    const averagePromises = studentsWithGrades.map(async (studentNumber) => {
-      const average = await calculateStudentAverage(studentNumber, currentSemester);
-      let firstName = "Étudiant";
-      let lastName = studentNumber;
-      const studentData = allStudents.find(
-        (s) => s.student_number === studentNumber,
-      );
-      if (studentData) {
-        firstName = studentData.first_name;
-        lastName = studentData.last_name;
-      }
-      if (average !== null) {
-        return {
-          studentNumber,
-          firstName,
-          lastName,
-          average,
-          isCurrent: studentNumber === currentStudentNumber,
-          hasGrade: true,
-        };
-      }
-      return null;
-    });
-
-    // Add students with no grades (S5 only — for S6, skip them as grades may not be uploaded yet)
-    if (currentSemester !== "S6") {
-      const studentsWithoutGrades = allStudents.filter(
-        (s) => !studentsWithGrades.includes(s.student_number),
-      );
-      studentsWithoutGrades.forEach((s) => {
-        studentAverages.push({
-          studentNumber: s.student_number,
-          firstName: s.first_name,
-          lastName: s.last_name,
-          average: 0,
-          isCurrent: s.student_number === currentStudentNumber,
-          hasGrade: false,
-        });
-      });
-    }
-
-    const results = await Promise.all(averagePromises);
-    results.forEach((student) => {
-      if (student) {
-        studentAverages.push(student);
-      }
-    });
+    // Compute average for every student — exclude from S6 if they have no S6 grades
+    const studentAverages = allStudents.map((s) => {
+      const records = gradesByStudent[s.student_number] || [];
+      const average = computeStudentAverage(records, currentSemester);
+      if (currentSemester === "S6" && average === null) return null;
+      return {
+        studentNumber: s.student_number,
+        firstName: s.first_name,
+        lastName: s.last_name,
+        average: average !== null ? average : 0,
+        isCurrent: s.student_number === currentStudentNumber,
+        hasGrade: average !== null,
+      };
+    }).filter(Boolean);
 
     // Sort by average descending, then by name for those with no grades
     studentAverages.sort((a, b) => {
