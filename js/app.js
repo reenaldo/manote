@@ -94,8 +94,7 @@ const noteFieldCoeffsS6 = {
   geo3d: { tp: 2, ecrit: 3 },
   mobile: { rendu: 2, ecrit: 3 },
   // UE Ouverture — matière fixe
-  // methodo: écrit ×3, quizz_moy ×2 → scaled: ecrit:9, quizz1:2, quizz2:2, quizz3:2 (total 15)
-  methodo: { ecrit: 9, quizz1: 2, quizz2: 2, quizz3: 2 },
+  methodo: { ecrit: 3, quizz: 2 },
   // UE Ouverture — matière au choix
   droit: { assiduite: 2, ecrit1: 9, ecrit2: 9 },
   mediation: { rapport: 1, soutenance: 1 },
@@ -219,6 +218,48 @@ window.selectS6Choice = function (group, choice, btn) {
   updateSimulatorUEOptions();
   updateAll();
 };
+
+// ===== AUTO-DETECT S6 CHOICES FROM LOADED GRADES =====
+function applyS6Choice(group, choice) {
+  s6Choices[group] = choice;
+
+  const s6Content = document.getElementById("s6-content");
+  if (!s6Content) return;
+
+  const targetPanel = s6Content.querySelector(`.choice-content[data-choice="${choice}"]`);
+  if (!targetPanel) return;
+
+  const choiceSection = targetPanel.closest(".choice-section");
+  if (!choiceSection) return;
+
+  choiceSection.querySelectorAll(".choice-tab").forEach((t) => {
+    const onclick = t.getAttribute("onclick") || "";
+    t.classList.toggle("active", onclick.includes(`'${choice}'`));
+  });
+
+  choiceSection.querySelectorAll(".choice-content").forEach((c) => c.classList.remove("active"));
+  targetPanel.classList.add("active");
+}
+
+function autoDetectS6Choices() {
+  const infoChoices = ["reseaux_loc", "geo3d", "mobile"];
+  for (const choice of infoChoices) {
+    const hasGrade = Array.from(
+      document.querySelectorAll(`#s6-content .note-input[data-ue="${choice}"]`)
+    ).some((i) => i.value !== "");
+    if (hasGrade) { applyS6Choice("info_opt", choice); break; }
+  }
+
+  const ouvChoices = ["droit", "mediation"];
+  for (const choice of ouvChoices) {
+    const hasGrade = Array.from(
+      document.querySelectorAll(`#s6-content .note-input[data-ue="${choice}"]`)
+    ).some((i) => i.value !== "");
+    if (hasGrade) { applyS6Choice("ouv_opt", choice); break; }
+  }
+
+  updateSimulatorUEOptions();
+}
 
 // ===== SIMULATOR UE OPTIONS =====
 function updateSimulatorUEOptions() {
@@ -436,6 +477,9 @@ window.loadStudentFromRanking = async function (studentNumber) {
       loadingModal.classList.remove("show");
     }
 
+    // Auto-select S6 choices based on loaded grades
+    autoDetectS6Choices();
+
     // Update all calculations
     updateAll();
 
@@ -461,8 +505,27 @@ window.loadStudentFromRanking = async function (studentNumber) {
   }
 };
 
-// Calculate average for a specific student number
-async function calculateStudentAverage(studentNumber) {
+// Detect S6 choices from a student's gradesByUE map
+function detectStudentS6Choices(gradesByUE) {
+  let info_opt = "reseaux_loc";
+  for (const choice of ["reseaux_loc", "geo3d", "mobile"]) {
+    if (gradesByUE[choice] && Object.keys(gradesByUE[choice]).length > 0) {
+      info_opt = choice;
+      break;
+    }
+  }
+  let ouv_opt = "droit";
+  for (const choice of ["droit", "mediation"]) {
+    if (gradesByUE[choice] && Object.keys(gradesByUE[choice]).length > 0) {
+      ouv_opt = choice;
+      break;
+    }
+  }
+  return { info_opt, ouv_opt };
+}
+
+// Calculate average for a specific student number (S5 or S6)
+async function calculateStudentAverage(studentNumber, semester = "S5") {
   if (!window.supabaseClient) return null;
 
   try {
@@ -476,48 +539,61 @@ async function calculateStudentAverage(studentNumber) {
     // Organize grades by UE and note_field
     const gradesByUE = {};
     data.forEach((record) => {
-      const ue = record.ue;
-      if (!gradesByUE[ue]) {
-        gradesByUE[ue] = {};
-      }
-      gradesByUE[ue][record.note_field] = parseFloat(record.grade) || 0;
+      if (!gradesByUE[record.ue]) gradesByUE[record.ue] = {};
+      gradesByUE[record.ue][record.note_field] = parseFloat(record.grade) || 0;
     });
 
-    // Calculate UE averages using noteFieldCoeffs
+    // Pick the right config for the semester
+    let activeNoteFieldCoeffs, activeConfig;
+    if (semester === "S6") {
+      activeNoteFieldCoeffs = noteFieldCoeffsS6;
+      const { info_opt, ouv_opt } = detectStudentS6Choices(gradesByUE);
+      activeConfig = {
+        tdl: { coeff: 6, ues: ["tdl"], ueCoeffs: { tdl: 1 } },
+        projet_s6: { coeff: 6, ues: ["projet_s6"], ueCoeffs: { projet_s6: 1 } },
+        info_s6: {
+          coeff: 9,
+          ues: ["ihm", "ia", info_opt],
+          ueCoeffs: { ihm: 1, ia: 1, [info_opt]: 1 },
+        },
+        ouverture_s6: {
+          coeff: 6,
+          ues: ["methodo", ouv_opt],
+          ueCoeffs: { methodo: 1, [ouv_opt]: 1 },
+        },
+      };
+    } else {
+      activeNoteFieldCoeffs = noteFieldCoeffs;
+      activeConfig = blocsConfig;
+    }
+
+    // Calculate UE averages
     const ueAverages = {};
     Object.keys(gradesByUE).forEach((ue) => {
       const notes = gradesByUE[ue];
-      const coeffs = noteFieldCoeffs[ue] || {};
-
-      let points = 0;
-      let coeff = 0;
-
+      const coeffs = activeNoteFieldCoeffs[ue] || {};
+      let points = 0, coeff = 0;
       Object.keys(coeffs).forEach((noteField) => {
-        const grade = notes[noteField] || 0;
-        const fieldCoeff = coeffs[noteField] || 1;
-        points += grade * fieldCoeff;
-        coeff += fieldCoeff;
+        points += (notes[noteField] || 0) * (coeffs[noteField] || 1);
+        coeff += coeffs[noteField] || 1;
       });
-
       ueAverages[ue] = coeff > 0 ? points / coeff : 0;
     });
 
-    // Calculate bloc averages and general average
-    let totalPoints = 0;
-    let totalCoeff = 0;
+    // If the student has no grades for this semester's UE codes, exclude them
+    const semesterUEs = Object.values(activeConfig).flatMap((c) => c.ues);
+    const hasAnySemesterGrade = semesterUEs.some((ue) => ueAverages[ue] !== undefined);
+    if (!hasAnySemesterGrade) return null;
 
-    Object.keys(blocsConfig).forEach((blocCode) => {
-      const config = blocsConfig[blocCode];
-      let blocPoints = 0;
-      let blocCoeff = 0;
-
+    // Calculate general average
+    let totalPoints = 0, totalCoeff = 0;
+    Object.keys(activeConfig).forEach((blocCode) => {
+      const config = activeConfig[blocCode];
+      let blocPoints = 0, blocCoeff = 0;
       config.ues.forEach((ue) => {
-        const ueAvg = ueAverages[ue] || 0;
-        const ueCoeff = config.ueCoeffs[ue] || 1;
-        blocPoints += ueAvg * ueCoeff;
-        blocCoeff += ueCoeff;
+        blocPoints += (ueAverages[ue] || 0) * (config.ueCoeffs[ue] || 1);
+        blocCoeff += config.ueCoeffs[ue] || 1;
       });
-
       const blocAvg = blocCoeff > 0 ? blocPoints / blocCoeff : 0;
       totalPoints += blocAvg * config.coeff;
       totalCoeff += config.coeff;
@@ -576,10 +652,18 @@ async function loadAndDisplayRanking() {
     ];
     const allStudentNumbers = allStudents.map((s) => s.student_number);
 
+    // Update ranking modal subtitle to reflect current semester
+    const rankingSubtitle = document.querySelector(".ranking-subtitle");
+    if (rankingSubtitle) {
+      rankingSubtitle.textContent = currentSemester === "S6"
+        ? "Classement Semestre 6"
+        : "Classement Semestre 5";
+    }
+
     // Calculate averages for all students with grades
     const studentAverages = [];
     const averagePromises = studentsWithGrades.map(async (studentNumber) => {
-      const average = await calculateStudentAverage(studentNumber);
+      const average = await calculateStudentAverage(studentNumber, currentSemester);
       let firstName = "Étudiant";
       let lastName = studentNumber;
       const studentData = allStudents.find(
@@ -683,7 +767,7 @@ async function loadAndDisplayRanking() {
           ((classTotal - currentRank + 1) / classTotal) * 100,
         );
         rankingPositionEl.textContent = `#${currentRank}`;
-        rankingDetailEl.textContent = `${percentAbove}% au-dessus de la moyenne`;
+        rankingDetailEl.textContent = `dans le top ${percentAbove}% de la promo`;
       } else {
         rankingPositionEl.textContent = "--";
         rankingDetailEl.textContent = "Non trouvé";
@@ -695,9 +779,9 @@ async function loadAndDisplayRanking() {
         <div class="ranking-stats">
           <span>Tu es au <strong>#${currentRank}</strong> sur <strong>${classTotal}</strong></span>
           <span>•</span>
-          <span>${Math.round(
+          <span>top ${Math.round(
             ((classTotal - currentRank + 1) / classTotal) * 100,
-          )}% au-dessus</span>
+          )}% de la promo</span>
         </div>
       `;
     } else {
@@ -882,35 +966,29 @@ function calcScenario(defaultValue) {
 
 function updateScenarios() {
   const bestScenario = document.getElementById("best-scenario");
-  const worstScenario = document.getElementById("worst-scenario");
   const currentScenario = document.getElementById("current-scenario");
   const bestDetail = document.getElementById("best-detail");
-  const worstDetail = document.getElementById("worst-detail");
 
-  if (
-    !bestScenario ||
-    !worstScenario ||
-    !currentScenario ||
-    !bestDetail ||
-    !worstDetail
-  ) {
+  if (!bestScenario || !currentScenario || !bestDetail) {
     return;
   }
 
   bestScenario.textContent = calcScenario(20).toFixed(2);
-  worstScenario.textContent = calcScenario(0).toFixed(2);
   currentScenario.textContent = calcGeneral().toFixed(2);
 
+  // Count only inputs belonging to the active semester/config
+  const activeConfig = getActiveBlocsConfig();
   let emptyCount = 0;
-  document.querySelectorAll(".note-input").forEach((input) => {
-    if (input.value === "") emptyCount++;
+  Object.keys(activeConfig).forEach((blocCode) => {
+    activeConfig[blocCode].ues.forEach((ueCode) => {
+      getUEInputs(ueCode).forEach((input) => {
+        if (input.value === "") emptyCount++;
+      });
+    });
   });
 
   bestDetail.textContent = emptyCount
     ? `20/20 sur ${emptyCount} notes`
-    : "Complet";
-  worstDetail.textContent = emptyCount
-    ? `0/20 sur ${emptyCount} notes`
     : "Complet";
 }
 
@@ -1402,6 +1480,9 @@ window.importGradesFromSupabase = async function () {
     if (loadingModalClose) {
       loadingModalClose.classList.remove("show");
     }
+
+    // Auto-select S6 choices based on loaded grades
+    autoDetectS6Choices();
 
     // Update all calculations
     updateAll();

@@ -80,17 +80,39 @@
 
       <!-- Semester Tabs -->
       <div class="semester-tabs">
-        <button class="semester-tab active" id="tab-s5" onclick="switchSemester('S5')">S5</button>
-        <button class="semester-tab" id="tab-s6" onclick="switchSemester('S6')">S6</button>
+        <button
+          class="semester-tab active"
+          id="tab-s5"
+          onclick="switchSemester('S5')"
+        >
+          S5
+        </button>
+        <button class="semester-tab" id="tab-s6" onclick="switchSemester('S6')">
+          S6
+        </button>
       </div>
 
       <!-- Mobile Stats Toggle Button -->
-      <button class="mobile-stats-toggle" id="mobile-stats-toggle" onclick="toggleMobileStats()">
+      <button
+        class="mobile-stats-toggle"
+        id="mobile-stats-toggle"
+        onclick="toggleMobileStats()"
+      >
         <div class="mobile-stats-toggle-content">
-          <span class="mobile-stats-toggle-text">Statistiques & Simulateur</span>
-          <span class="mobile-stats-toggle-avg" id="mobile-avg-display">0.00</span>
+          <span class="mobile-stats-toggle-text"
+            >Statistiques & Simulateur</span
+          >
+          <span class="mobile-stats-toggle-avg" id="mobile-avg-display"
+            >0.00</span
+          >
         </div>
-        <svg class="mobile-stats-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg
+          class="mobile-stats-chevron"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
@@ -196,10 +218,16 @@
                 </div>
                 <input type="hidden" id="sim-ue-select" value="" />
               </div>
-              <div class="sim-result" id="sim-ue-result" style="margin-top: 8px">
+              <div
+                class="sim-result"
+                id="sim-ue-result"
+                style="margin-top: 8px"
+              >
                 --
               </div>
-              <div class="sim-detail" id="sim-ue-detail">Sélectionne une UE</div>
+              <div class="sim-detail" id="sim-ue-detail">
+                Sélectionne une UE
+              </div>
             </div>
           </div>
         </div>
@@ -207,644 +235,655 @@
 
       <!-- S5 Content -->
       <div id="s5-content">
-
-      <!-- Hidden inputs — kept for Supabase import + calculation -->
-      <div id="s5-inputs-hidden" style="display:none">
-      <div class="blocs-grid">
-        <!-- Bloc 1: Graphes -->
-        <div class="bloc-card glass">
-          <div class="bloc-header cyan">
-            <div class="bloc-title">Graphes et algorithmes</div>
-            <div>
-              <div class="bloc-moyenne cyan" id="moyenne-graphes">0.00</div>
-              <div class="bloc-coeff">Coeff 6</div>
-            </div>
-          </div>
-          <div class="bloc-content">
-            <div class="ue-item expanded" data-ue="ga">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">Graphes et algorithmes</div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-ga"
-                    >Non validée</span
-                  >
-                </div>
-                <div class="ue-moyenne" id="moyenne-ga">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-              </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">Écrit</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="ga"
-                    data-note="ecrit"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">TP noté</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="ga"
-                    data-note="tp"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
+        <!-- Hidden inputs — kept for Supabase import + calculation -->
+        <div id="s5-inputs-hidden" style="display: none">
+          <div class="blocs-grid">
+            <!-- Bloc 1: Graphes -->
+            <div class="bloc-card glass">
+              <div class="bloc-header cyan">
+                <div class="bloc-title">Graphes et algorithmes</div>
+                <div>
+                  <div class="bloc-moyenne cyan" id="moyenne-graphes">0.00</div>
+                  <div class="bloc-coeff">Coeff 6</div>
                 </div>
               </div>
-            </div>
-            <div class="ue-item expanded" data-ue="ps">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">Problem solving</div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-ps"
-                    >Non validée</span
-                  >
-                </div>
-                <div class="ue-moyenne" id="moyenne-ps">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-              </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">Project 1</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="ps"
-                    data-note="pr1"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">Project 2</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="ps"
-                    data-note="pr2"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div
-                  class="progress-fill cyan"
-                  id="progress-graphes"
-                  style="width: 0%"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bloc 2: Maths -->
-        <div class="bloc-card glass">
-          <div class="bloc-header pink">
-            <div class="bloc-title">Mathématiques</div>
-            <div>
-              <div class="bloc-moyenne pink" id="moyenne-maths">0.00</div>
-              <div class="bloc-coeff">Coeff 6</div>
-            </div>
-          </div>
-          <div class="bloc-content">
-            <div class="ue-item expanded" data-ue="proba">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">Probabilités et Statistiques</div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-proba"
-                    >Non validée</span
-                  >
-                </div>
-                <div class="ue-moyenne" id="moyenne-proba">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-              </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">TP noté</span>
-                  <span class="note-coeff">×2</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="proba"
-                    data-note="tp"
-                    data-coeff="2"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">Écrit</span>
-                  <span class="note-coeff">×3</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="proba"
-                    data-note="ecrit"
-                    data-coeff="3"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">QCM</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="proba"
-                    data-note="qcm"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="ue-item expanded" data-ue="signal">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">Traitement du signal</div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-signal"
-                    >Non validée</span
-                  >
-                </div>
-                <div class="ue-moyenne" id="moyenne-signal">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-              </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">Écrit 1</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="signal"
-                    data-note="ecrit1"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">Écrit 2</span>
-                  <span class="note-coeff">×2</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="signal"
-                    data-note="ecrit2"
-                    data-coeff="2"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div
-                  class="progress-fill pink"
-                  id="progress-maths"
-                  style="width: 0%"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bloc 3: Architecture -->
-        <div class="bloc-card glass">
-          <div class="bloc-header purple">
-            <div class="bloc-title">Architecture systèmes et réseaux</div>
-            <div>
-              <div class="bloc-moyenne purple" id="moyenne-archi">0.00</div>
-              <div class="bloc-coeff">Coeff 9</div>
-            </div>
-          </div>
-          <div class="bloc-content">
-            <div class="ue-item expanded" data-ue="ase">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">
-                    Architecture des Systèmes d'Exploitation
+              <div class="bloc-content">
+                <div class="ue-item expanded" data-ue="ga">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">Graphes et algorithmes</div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-ga"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-ga">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
                   </div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-ase"
-                    >Non validée</span
-                  >
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="ga"
+                        data-note="ecrit"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">TP noté</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="ga"
+                        data-note="tp"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div class="ue-moyenne" id="moyenne-ase">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-              </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">QCM</span>
-                  <span class="note-coeff">×3</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="ase"
-                    data-note="qcm"
-                    data-coeff="3"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
+                <div class="ue-item expanded" data-ue="ps">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">Problem solving</div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-ps"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-ps">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">Project 1</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="ps"
+                        data-note="pr1"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">Project 2</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="ps"
+                        data-note="pr2"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div class="note-input-group">
-                  <span class="note-label">TP noté</span>
-                  <span class="note-coeff">×3</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="ase"
-                    data-note="tp"
-                    data-coeff="3"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">Écrit</span>
-                  <span class="note-coeff">×3</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="ase"
-                    data-note="ecrit"
-                    data-coeff="3"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="ue-item expanded" data-ue="reseaux">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">Algorithmes réseaux</div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-reseaux"
-                    >Non validée</span
-                  >
-                </div>
-                <div class="ue-moyenne" id="moyenne-reseaux">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-              </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">TP noté</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="reseaux"
-                    data-note="tp"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">Écrit</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="reseaux"
-                    data-note="ecrit"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
+                <div class="progress-container">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill cyan"
+                      id="progress-graphes"
+                      style="width: 0%"
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div
-                  class="progress-fill purple"
-                  id="progress-archi"
-                  style="width: 0%"
-                ></div>
+
+            <!-- Bloc 2: Maths -->
+            <div class="bloc-card glass">
+              <div class="bloc-header pink">
+                <div class="bloc-title">Mathématiques</div>
+                <div>
+                  <div class="bloc-moyenne pink" id="moyenne-maths">0.00</div>
+                  <div class="bloc-coeff">Coeff 6</div>
+                </div>
+              </div>
+              <div class="bloc-content">
+                <div class="ue-item expanded" data-ue="proba">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">Probabilités et Statistiques</div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-proba"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-proba">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">TP noté</span>
+                      <span class="note-coeff">×2</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="proba"
+                        data-note="tp"
+                        data-coeff="2"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit</span>
+                      <span class="note-coeff">×3</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="proba"
+                        data-note="ecrit"
+                        data-coeff="3"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">QCM</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="proba"
+                        data-note="qcm"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="ue-item expanded" data-ue="signal">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">Traitement du signal</div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-signal"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-signal">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit 1</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="signal"
+                        data-note="ecrit1"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit 2</span>
+                      <span class="note-coeff">×2</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="signal"
+                        data-note="ecrit2"
+                        data-coeff="2"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-container">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill pink"
+                      id="progress-maths"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bloc 3: Architecture -->
+            <div class="bloc-card glass">
+              <div class="bloc-header purple">
+                <div class="bloc-title">Architecture systèmes et réseaux</div>
+                <div>
+                  <div class="bloc-moyenne purple" id="moyenne-archi">0.00</div>
+                  <div class="bloc-coeff">Coeff 9</div>
+                </div>
+              </div>
+              <div class="bloc-content">
+                <div class="ue-item expanded" data-ue="ase">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">
+                        Architecture des Systèmes d'Exploitation
+                      </div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-ase"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-ase">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">QCM</span>
+                      <span class="note-coeff">×3</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="ase"
+                        data-note="qcm"
+                        data-coeff="3"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">TP noté</span>
+                      <span class="note-coeff">×3</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="ase"
+                        data-note="tp"
+                        data-coeff="3"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit</span>
+                      <span class="note-coeff">×3</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="ase"
+                        data-note="ecrit"
+                        data-coeff="3"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="ue-item expanded" data-ue="reseaux">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">Algorithmes réseaux</div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-reseaux"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-reseaux">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">TP noté</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="reseaux"
+                        data-note="tp"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="reseaux"
+                        data-note="ecrit"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-container">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill purple"
+                      id="progress-archi"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bloc 4: BDD -->
+            <div class="bloc-card glass">
+              <div class="bloc-header blue">
+                <div class="bloc-title">BDD et Génie logiciel</div>
+                <div>
+                  <div class="bloc-moyenne blue" id="moyenne-bdd">0.00</div>
+                  <div class="bloc-coeff">Coeff 6</div>
+                </div>
+              </div>
+              <div class="bloc-content">
+                <div class="ue-item expanded" data-ue="bd2">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">Bases de données 2</div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-bd2"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-bd2">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">Projet</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="bd2"
+                        data-note="projet"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="bd2"
+                        data-note="ecrit"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="ue-item expanded" data-ue="gl">
+                  <div class="ue-header" onclick="toggleUE(this)">
+                    <div class="ue-info">
+                      <div class="ue-name">Génie logiciel</div>
+                      <span
+                        class="validation-badge not-validated"
+                        id="validation-gl"
+                        >Non validée</span
+                      >
+                    </div>
+                    <div class="ue-moyenne" id="moyenne-gl">0.00</div>
+                    <button class="toggle-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="notes-grid">
+                    <div class="note-input-group">
+                      <span class="note-label">TP note</span>
+                      <span class="note-coeff">×1</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="gl"
+                        data-note="projet"
+                        data-coeff="1"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                    <div class="note-input-group">
+                      <span class="note-label">Écrit</span>
+                      <span class="note-coeff">×2</span>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        class="note-input"
+                        data-ue="gl"
+                        data-note="ecrit"
+                        data-coeff="2"
+                        min="0"
+                        max="20"
+                        step="0.25"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-container">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill blue"
+                      id="progress-bdd"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <!-- end s5-inputs-hidden -->
 
-        <!-- Bloc 4: BDD -->
-        <div class="bloc-card glass">
-          <div class="bloc-header blue">
-            <div class="bloc-title">BDD et Génie logiciel</div>
+        <!-- S5 Results Display -->
+        <div class="s5-results">
+          <div class="s5-results-intro">
+            <span class="s5-results-icon">🎓</span>
             <div>
-              <div class="bloc-moyenne blue" id="moyenne-bdd">0.00</div>
-              <div class="bloc-coeff">Coeff 6</div>
+              <div class="s5-results-title">Résultats Semestre 5</div>
+              <div class="s5-results-subtitle">
+                Notes finales du jury 2025–2026
+              </div>
             </div>
           </div>
-          <div class="bloc-content">
-            <div class="ue-item expanded" data-ue="bd2">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">Bases de données 2</div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-bd2"
-                    >Non validée</span
-                  >
-                </div>
-                <div class="ue-moyenne" id="moyenne-bd2">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
+
+          <div class="s5-blocs-grid">
+            <div class="s5-bloc-card glass">
+              <div class="s5-bloc-color-bar cyan"></div>
+              <div class="s5-bloc-info">
+                <div class="s5-bloc-name">Graphes et algorithmes</div>
+                <div class="s5-bloc-ects">6 ECTS</div>
               </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">Écrit</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="bd2"
-                    data-note="projet"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">Projet</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="bd2"
-                    data-note="ecrit"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
+              <div class="s5-bloc-right">
+                <div class="s5-bloc-moy cyan" id="s5-moy-graphes">0.00</div>
+                <span
+                  class="validation-badge not-validated"
+                  id="s5-valid-graphes"
+                  >Non validé</span
+                >
               </div>
             </div>
-            <div class="ue-item expanded" data-ue="gl">
-              <div class="ue-header" onclick="toggleUE(this)">
-                <div class="ue-info">
-                  <div class="ue-name">Génie logiciel</div>
-                  <span
-                    class="validation-badge not-validated"
-                    id="validation-gl"
-                    >Non validée</span
-                  >
-                </div>
-                <div class="ue-moyenne" id="moyenne-gl">0.00</div>
-                <button class="toggle-btn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
+
+            <div class="s5-bloc-card glass">
+              <div class="s5-bloc-color-bar pink"></div>
+              <div class="s5-bloc-info">
+                <div class="s5-bloc-name">Mathématiques</div>
+                <div class="s5-bloc-ects">6 ECTS</div>
               </div>
-              <div class="notes-grid">
-                <div class="note-input-group">
-                  <span class="note-label">TP note</span>
-                  <span class="note-coeff">×1</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="gl"
-                    data-note="projet"
-                    data-coeff="1"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
-                <div class="note-input-group">
-                  <span class="note-label">Écrit</span>
-                  <span class="note-coeff">×2</span>
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="note-input"
-                    data-ue="gl"
-                    data-note="ecrit"
-                    data-coeff="2"
-                    min="0"
-                    max="20"
-                    step="0.25"
-                  />
-                </div>
+              <div class="s5-bloc-right">
+                <div class="s5-bloc-moy pink" id="s5-moy-maths">0.00</div>
+                <span class="validation-badge not-validated" id="s5-valid-maths"
+                  >Non validé</span
+                >
               </div>
             </div>
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div
-                  class="progress-fill blue"
-                  id="progress-bdd"
-                  style="width: 0%"
-                ></div>
+
+            <div class="s5-bloc-card glass">
+              <div class="s5-bloc-color-bar purple"></div>
+              <div class="s5-bloc-info">
+                <div class="s5-bloc-name">Architecture systèmes et réseaux</div>
+                <div class="s5-bloc-ects">9 ECTS</div>
+              </div>
+              <div class="s5-bloc-right">
+                <div class="s5-bloc-moy purple" id="s5-moy-archi">0.00</div>
+                <span class="validation-badge not-validated" id="s5-valid-archi"
+                  >Non validé</span
+                >
               </div>
             </div>
+
+            <div class="s5-bloc-card glass">
+              <div class="s5-bloc-color-bar blue"></div>
+              <div class="s5-bloc-info">
+                <div class="s5-bloc-name">BDD et Génie logiciel</div>
+                <div class="s5-bloc-ects">6 ECTS</div>
+              </div>
+              <div class="s5-bloc-right">
+                <div class="s5-bloc-moy blue" id="s5-moy-bdd">0.00</div>
+                <span class="validation-badge not-validated" id="s5-valid-bdd"
+                  >Non validé</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="s5-final-card glass">
+            <div class="s5-final-label">Moyenne générale S5</div>
+            <div class="s5-final-value cyan" id="s5-moy-generale">0.00</div>
+            <div class="s5-final-sub">/20</div>
           </div>
         </div>
       </div>
-      </div><!-- end s5-inputs-hidden -->
-
-      <!-- S5 Results Display -->
-      <div class="s5-results">
-        <div class="s5-results-intro">
-          <span class="s5-results-icon">🎓</span>
-          <div>
-            <div class="s5-results-title">Résultats Semestre 5</div>
-            <div class="s5-results-subtitle">Notes finales du jury 2025–2026</div>
-          </div>
-        </div>
-
-        <div class="s5-blocs-grid">
-          <div class="s5-bloc-card glass">
-            <div class="s5-bloc-color-bar cyan"></div>
-            <div class="s5-bloc-info">
-              <div class="s5-bloc-name">Graphes et algorithmes</div>
-              <div class="s5-bloc-ects">6 ECTS</div>
-            </div>
-            <div class="s5-bloc-right">
-              <div class="s5-bloc-moy cyan" id="s5-moy-graphes">0.00</div>
-              <span class="validation-badge not-validated" id="s5-valid-graphes">Non validé</span>
-            </div>
-          </div>
-
-          <div class="s5-bloc-card glass">
-            <div class="s5-bloc-color-bar pink"></div>
-            <div class="s5-bloc-info">
-              <div class="s5-bloc-name">Mathématiques</div>
-              <div class="s5-bloc-ects">6 ECTS</div>
-            </div>
-            <div class="s5-bloc-right">
-              <div class="s5-bloc-moy pink" id="s5-moy-maths">0.00</div>
-              <span class="validation-badge not-validated" id="s5-valid-maths">Non validé</span>
-            </div>
-          </div>
-
-          <div class="s5-bloc-card glass">
-            <div class="s5-bloc-color-bar purple"></div>
-            <div class="s5-bloc-info">
-              <div class="s5-bloc-name">Architecture systèmes et réseaux</div>
-              <div class="s5-bloc-ects">9 ECTS</div>
-            </div>
-            <div class="s5-bloc-right">
-              <div class="s5-bloc-moy purple" id="s5-moy-archi">0.00</div>
-              <span class="validation-badge not-validated" id="s5-valid-archi">Non validé</span>
-            </div>
-          </div>
-
-          <div class="s5-bloc-card glass">
-            <div class="s5-bloc-color-bar blue"></div>
-            <div class="s5-bloc-info">
-              <div class="s5-bloc-name">BDD et Génie logiciel</div>
-              <div class="s5-bloc-ects">6 ECTS</div>
-            </div>
-            <div class="s5-bloc-right">
-              <div class="s5-bloc-moy blue" id="s5-moy-bdd">0.00</div>
-              <span class="validation-badge not-validated" id="s5-valid-bdd">Non validé</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="s5-final-card glass">
-          <div class="s5-final-label">Moyenne générale S5</div>
-          <div class="s5-final-value cyan" id="s5-moy-generale">0.00</div>
-          <div class="s5-final-sub">/20</div>
-        </div>
-      </div>
-
-      </div><!-- end s5-content -->
+      <!-- end s5-content -->
 
       <!-- S6 Content -->
-      <div id="s6-content" style="display:none">
-
+      <div id="s6-content" style="display: none">
         <!-- L3 Licence Tracker -->
         <div class="l3-tracker glass" id="l3-tracker">
           <div class="l3-tracker-left">
@@ -859,7 +898,6 @@
         </div>
 
         <div class="blocs-grid">
-
           <!-- Bloc S6-1: Théorie des langages -->
           <div class="bloc-card glass">
             <div class="bloc-header cyan">
@@ -874,10 +912,19 @@
                 <div class="ue-header" onclick="toggleUE(this)">
                   <div class="ue-info">
                     <div class="ue-name">Théorie des langages</div>
-                    <span class="validation-badge not-validated" id="validation-tdl">Non validée</span>
+                    <span
+                      class="validation-badge not-validated"
+                      id="validation-tdl"
+                      >Non validée</span
+                    >
                   </div>
                   <button class="toggle-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </button>
@@ -886,23 +933,57 @@
                   <div class="note-input-group">
                     <span class="note-label">Écrit 1</span>
                     <span class="note-coeff">×1</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="tdl" data-note="ecrit1" data-coeff="1" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="tdl"
+                      data-note="ecrit1"
+                      data-coeff="1"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                   <div class="note-input-group">
                     <span class="note-label">Écrit 2</span>
                     <span class="note-coeff">×1</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="tdl" data-note="ecrit2" data-coeff="1" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="tdl"
+                      data-note="ecrit2"
+                      data-coeff="1"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                   <div class="note-input-group">
                     <span class="note-label">Écrit 3</span>
                     <span class="note-coeff">×2</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="tdl" data-note="ecrit3" data-coeff="2" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="tdl"
+                      data-note="ecrit3"
+                      data-coeff="2"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                 </div>
               </div>
               <div class="progress-container">
                 <div class="progress-bar">
-                  <div class="progress-fill cyan" id="progress-tdl" style="width:0%"></div>
+                  <div
+                    class="progress-fill cyan"
+                    id="progress-tdl"
+                    style="width: 0%"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -922,10 +1003,19 @@
                 <div class="ue-header" onclick="toggleUE(this)">
                   <div class="ue-info">
                     <div class="ue-name">Projet intégrateur</div>
-                    <span class="validation-badge not-validated" id="validation-projet_s6">Non validée</span>
+                    <span
+                      class="validation-badge not-validated"
+                      id="validation-projet_s6"
+                      >Non validée</span
+                    >
                   </div>
                   <button class="toggle-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </button>
@@ -934,13 +1024,27 @@
                   <div class="note-input-group">
                     <span class="note-label">Projet</span>
                     <span class="note-coeff">×1</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="projet_s6" data-note="projet" data-coeff="1" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="projet_s6"
+                      data-note="projet"
+                      data-coeff="1"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                 </div>
               </div>
               <div class="progress-container">
                 <div class="progress-bar">
-                  <div class="progress-fill pink" id="progress-projet_s6" style="width:0%"></div>
+                  <div
+                    class="progress-fill pink"
+                    id="progress-projet_s6"
+                    style="width: 0%"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -956,17 +1060,25 @@
               </div>
             </div>
             <div class="bloc-content">
-
               <!-- IHM -->
               <div class="ue-item expanded" data-ue="ihm">
                 <div class="ue-header" onclick="toggleUE(this)">
                   <div class="ue-info">
                     <div class="ue-name">Interaction hommes-machines</div>
-                    <span class="validation-badge not-validated" id="validation-ihm">Non validée</span>
+                    <span
+                      class="validation-badge not-validated"
+                      id="validation-ihm"
+                      >Non validée</span
+                    >
                   </div>
                   <div class="ue-moyenne" id="moyenne-ihm">0.00</div>
                   <button class="toggle-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </button>
@@ -975,17 +1087,47 @@
                   <div class="note-input-group">
                     <span class="note-label">Oral</span>
                     <span class="note-coeff">×1</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="ihm" data-note="oral" data-coeff="1" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="ihm"
+                      data-note="oral"
+                      data-coeff="1"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                   <div class="note-input-group">
                     <span class="note-label">Rendus écrits</span>
                     <span class="note-coeff">×1</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="ihm" data-note="rendus" data-coeff="1" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="ihm"
+                      data-note="rendus"
+                      data-coeff="1"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                   <div class="note-input-group">
                     <span class="note-label">Réalisation</span>
                     <span class="note-coeff">×2</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="ihm" data-note="realisation" data-coeff="2" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="ihm"
+                      data-note="realisation"
+                      data-coeff="2"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                 </div>
               </div>
@@ -995,11 +1137,20 @@
                 <div class="ue-header" onclick="toggleUE(this)">
                   <div class="ue-info">
                     <div class="ue-name">Intelligence artificielle</div>
-                    <span class="validation-badge not-validated" id="validation-ia">Non validée</span>
+                    <span
+                      class="validation-badge not-validated"
+                      id="validation-ia"
+                      >Non validée</span
+                    >
                   </div>
                   <div class="ue-moyenne" id="moyenne-ia">0.00</div>
                   <button class="toggle-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </button>
@@ -1008,12 +1159,32 @@
                   <div class="note-input-group">
                     <span class="note-label">Écrit</span>
                     <span class="note-coeff">×3</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="ia" data-note="ecrit" data-coeff="3" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="ia"
+                      data-note="ecrit"
+                      data-coeff="3"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                   <div class="note-input-group">
                     <span class="note-label">Projet</span>
                     <span class="note-coeff">×2</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="ia" data-note="projet" data-coeff="2" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="ia"
+                      data-note="projet"
+                      data-coeff="2"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                 </div>
               </div>
@@ -1022,9 +1193,24 @@
               <div class="choice-section">
                 <div class="choice-label">Matière au choix (1/3)</div>
                 <div class="choice-tabs">
-                  <button class="choice-tab active" onclick="selectS6Choice('info_opt','reseaux_loc',this)">Réseaux locaux</button>
-                  <button class="choice-tab" onclick="selectS6Choice('info_opt','geo3d',this)">Géométrie 3D</button>
-                  <button class="choice-tab" onclick="selectS6Choice('info_opt','mobile',this)">Prog. mobile</button>
+                  <button
+                    class="choice-tab active"
+                    onclick="selectS6Choice('info_opt', 'reseaux_loc', this)"
+                  >
+                    Réseaux locaux
+                  </button>
+                  <button
+                    class="choice-tab"
+                    onclick="selectS6Choice('info_opt', 'geo3d', this)"
+                  >
+                    Géométrie 3D
+                  </button>
+                  <button
+                    class="choice-tab"
+                    onclick="selectS6Choice('info_opt', 'mobile', this)"
+                  >
+                    Prog. mobile
+                  </button>
                 </div>
 
                 <div class="choice-content active" data-choice="reseaux_loc">
@@ -1032,11 +1218,22 @@
                     <div class="ue-header" onclick="toggleUE(this)">
                       <div class="ue-info">
                         <div class="ue-name">Réseaux locaux</div>
-                        <span class="validation-badge not-validated" id="validation-reseaux_loc">Non validée</span>
+                        <span
+                          class="validation-badge not-validated"
+                          id="validation-reseaux_loc"
+                          >Non validée</span
+                        >
                       </div>
-                      <div class="ue-moyenne" id="moyenne-reseaux_loc">0.00</div>
+                      <div class="ue-moyenne" id="moyenne-reseaux_loc">
+                        0.00
+                      </div>
                       <button class="toggle-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                       </button>
@@ -1045,12 +1242,32 @@
                       <div class="note-input-group">
                         <span class="note-label">Écrit</span>
                         <span class="note-coeff">×1</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="reseaux_loc" data-note="ecrit" data-coeff="1" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="reseaux_loc"
+                          data-note="ecrit"
+                          data-coeff="1"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                       <div class="note-input-group">
                         <span class="note-label">Rendu</span>
                         <span class="note-coeff">×1</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="reseaux_loc" data-note="rendu" data-coeff="1" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="reseaux_loc"
+                          data-note="rendu"
+                          data-coeff="1"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1061,11 +1278,20 @@
                     <div class="ue-header" onclick="toggleUE(this)">
                       <div class="ue-info">
                         <div class="ue-name">Géométrie pour la 3D</div>
-                        <span class="validation-badge not-validated" id="validation-geo3d">Non validée</span>
+                        <span
+                          class="validation-badge not-validated"
+                          id="validation-geo3d"
+                          >Non validée</span
+                        >
                       </div>
                       <div class="ue-moyenne" id="moyenne-geo3d">0.00</div>
                       <button class="toggle-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                       </button>
@@ -1074,12 +1300,32 @@
                       <div class="note-input-group">
                         <span class="note-label">TP Noté</span>
                         <span class="note-coeff">×2</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="geo3d" data-note="tp" data-coeff="2" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="geo3d"
+                          data-note="tp"
+                          data-coeff="2"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                       <div class="note-input-group">
                         <span class="note-label">Écrit</span>
                         <span class="note-coeff">×3</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="geo3d" data-note="ecrit" data-coeff="3" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="geo3d"
+                          data-note="ecrit"
+                          data-coeff="3"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1090,11 +1336,20 @@
                     <div class="ue-header" onclick="toggleUE(this)">
                       <div class="ue-info">
                         <div class="ue-name">Programmation mobile</div>
-                        <span class="validation-badge not-validated" id="validation-mobile">Non validée</span>
+                        <span
+                          class="validation-badge not-validated"
+                          id="validation-mobile"
+                          >Non validée</span
+                        >
                       </div>
                       <div class="ue-moyenne" id="moyenne-mobile">0.00</div>
                       <button class="toggle-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                       </button>
@@ -1103,21 +1358,46 @@
                       <div class="note-input-group">
                         <span class="note-label">Épreuve rendue</span>
                         <span class="note-coeff">×2</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="mobile" data-note="rendu" data-coeff="2" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="mobile"
+                          data-note="rendu"
+                          data-coeff="2"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                       <div class="note-input-group">
                         <span class="note-label">Écrit</span>
                         <span class="note-coeff">×3</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="mobile" data-note="ecrit" data-coeff="3" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="mobile"
+                          data-note="ecrit"
+                          data-coeff="3"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
-              </div><!-- end choice-section info -->
+              </div>
+              <!-- end choice-section info -->
 
               <div class="progress-container">
                 <div class="progress-bar">
-                  <div class="progress-fill purple" id="progress-info_s6" style="width:0%"></div>
+                  <div
+                    class="progress-fill purple"
+                    id="progress-info_s6"
+                    style="width: 0%"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -1128,22 +1408,32 @@
             <div class="bloc-header blue">
               <div class="bloc-title">UE d'Ouverture</div>
               <div>
-                <div class="bloc-moyenne blue" id="moyenne-ouverture_s6">0.00</div>
+                <div class="bloc-moyenne blue" id="moyenne-ouverture_s6">
+                  0.00
+                </div>
                 <div class="bloc-coeff">Coeff 6</div>
               </div>
             </div>
             <div class="bloc-content">
-
               <!-- Méthodologie scientifique -->
               <div class="ue-item expanded" data-ue="methodo">
                 <div class="ue-header" onclick="toggleUE(this)">
                   <div class="ue-info">
                     <div class="ue-name">Méthodologie scientifique</div>
-                    <span class="validation-badge not-validated" id="validation-methodo">Non validée</span>
+                    <span
+                      class="validation-badge not-validated"
+                      id="validation-methodo"
+                      >Non validée</span
+                    >
                   </div>
                   <div class="ue-moyenne" id="moyenne-methodo">0.00</div>
                   <button class="toggle-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </button>
@@ -1152,22 +1442,32 @@
                   <div class="note-input-group">
                     <span class="note-label">Écrit</span>
                     <span class="note-coeff">×3</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="methodo" data-note="ecrit" data-coeff="9" min="0" max="20" step="0.25" />
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="methodo"
+                      data-note="ecrit"
+                      data-coeff="3"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                   <div class="note-input-group">
-                    <span class="note-label">Quizz 1</span>
-                    <span class="note-coeff">moy×2</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="methodo" data-note="quizz1" data-coeff="2" min="0" max="20" step="0.25" />
-                  </div>
-                  <div class="note-input-group">
-                    <span class="note-label">Quizz 2</span>
-                    <span class="note-coeff">moy×2</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="methodo" data-note="quizz2" data-coeff="2" min="0" max="20" step="0.25" />
-                  </div>
-                  <div class="note-input-group">
-                    <span class="note-label">Quizz 3</span>
-                    <span class="note-coeff">moy×2</span>
-                    <input type="text" inputmode="decimal" class="note-input" data-ue="methodo" data-note="quizz3" data-coeff="2" min="0" max="20" step="0.25" />
+                    <span class="note-label">Quizz</span>
+                    <span class="note-coeff">×2</span>
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      class="note-input"
+                      data-ue="methodo"
+                      data-note="quizz"
+                      data-coeff="2"
+                      min="0"
+                      max="20"
+                      step="0.25"
+                    />
                   </div>
                 </div>
               </div>
@@ -1176,8 +1476,18 @@
               <div class="choice-section">
                 <div class="choice-label">Matière au choix (1/2)</div>
                 <div class="choice-tabs">
-                  <button class="choice-tab active" onclick="selectS6Choice('ouv_opt','droit',this)">Droit</button>
-                  <button class="choice-tab" onclick="selectS6Choice('ouv_opt','mediation',this)">Médiation scientifique</button>
+                  <button
+                    class="choice-tab active"
+                    onclick="selectS6Choice('ouv_opt', 'droit', this)"
+                  >
+                    Droit
+                  </button>
+                  <button
+                    class="choice-tab"
+                    onclick="selectS6Choice('ouv_opt', 'mediation', this)"
+                  >
+                    Médiation scientifique
+                  </button>
                 </div>
 
                 <div class="choice-content active" data-choice="droit">
@@ -1185,11 +1495,20 @@
                     <div class="ue-header" onclick="toggleUE(this)">
                       <div class="ue-info">
                         <div class="ue-name">Droit</div>
-                        <span class="validation-badge not-validated" id="validation-droit">Non validée</span>
+                        <span
+                          class="validation-badge not-validated"
+                          id="validation-droit"
+                          >Non validée</span
+                        >
                       </div>
                       <div class="ue-moyenne" id="moyenne-droit">0.00</div>
                       <button class="toggle-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                       </button>
@@ -1198,17 +1517,47 @@
                       <div class="note-input-group">
                         <span class="note-label">Assiduité</span>
                         <span class="note-coeff">×2</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="droit" data-note="assiduite" data-coeff="2" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="droit"
+                          data-note="assiduite"
+                          data-coeff="2"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                       <div class="note-input-group">
                         <span class="note-label">Écrit 1</span>
                         <span class="note-coeff">×9</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="droit" data-note="ecrit1" data-coeff="9" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="droit"
+                          data-note="ecrit1"
+                          data-coeff="9"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                       <div class="note-input-group">
                         <span class="note-label">Écrit 2</span>
                         <span class="note-coeff">×9</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="droit" data-note="ecrit2" data-coeff="9" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="droit"
+                          data-note="ecrit2"
+                          data-coeff="9"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1218,12 +1567,23 @@
                   <div class="ue-item expanded" data-ue="mediation">
                     <div class="ue-header" onclick="toggleUE(this)">
                       <div class="ue-info">
-                        <div class="ue-name">Médiation scientifique en info</div>
-                        <span class="validation-badge not-validated" id="validation-mediation">Non validée</span>
+                        <div class="ue-name">
+                          Médiation scientifique en info
+                        </div>
+                        <span
+                          class="validation-badge not-validated"
+                          id="validation-mediation"
+                          >Non validée</span
+                        >
                       </div>
                       <div class="ue-moyenne" id="moyenne-mediation">0.00</div>
                       <button class="toggle-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                       </button>
@@ -1232,21 +1592,46 @@
                       <div class="note-input-group">
                         <span class="note-label">Rapport écrit</span>
                         <span class="note-coeff">×1</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="mediation" data-note="rapport" data-coeff="1" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="mediation"
+                          data-note="rapport"
+                          data-coeff="1"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                       <div class="note-input-group">
                         <span class="note-label">Soutenance</span>
                         <span class="note-coeff">×1</span>
-                        <input type="text" inputmode="decimal" class="note-input" data-ue="mediation" data-note="soutenance" data-coeff="1" min="0" max="20" step="0.25" />
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          class="note-input"
+                          data-ue="mediation"
+                          data-note="soutenance"
+                          data-coeff="1"
+                          min="0"
+                          max="20"
+                          step="0.25"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
-              </div><!-- end choice-section ouverture -->
+              </div>
+              <!-- end choice-section ouverture -->
 
               <div class="progress-container">
                 <div class="progress-bar">
-                  <div class="progress-fill blue" id="progress-ouverture_s6" style="width:0%"></div>
+                  <div
+                    class="progress-fill blue"
+                    id="progress-ouverture_s6"
+                    style="width: 0%"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -1257,20 +1642,37 @@
             <div class="bloc-header green">
               <div class="bloc-title">Langue (3 ECTS)</div>
               <div>
-                <div class="bloc-coeff" style="color:var(--neon-green)">Non comptabilisée</div>
+                <div class="bloc-coeff" style="color: var(--neon-green)">
+                  Non comptabilisée
+                </div>
               </div>
             </div>
             <div class="bloc-content">
-              <div style="padding: 12px 0; color: var(--text-secondary); font-size: 0.88rem; text-align: center; line-height: 1.6;">
-                Évaluée par <strong style="color:var(--neon-green)">niveau de langue</strong><br>
-                (Anglais ou Allemand Lansad)<br>
-                <span style="color: var(--text-tertiary); font-size: 0.8rem;">Ne compte pas dans la moyenne générale<br>Diviseur : 27 crédits</span>
+              <div
+                style="
+                  padding: 12px 0;
+                  color: var(--text-secondary);
+                  font-size: 0.88rem;
+                  text-align: center;
+                  line-height: 1.6;
+                "
+              >
+                Évaluée par
+                <strong style="color: var(--neon-green)"
+                  >niveau de langue</strong
+                ><br />
+                (Anglais ou Allemand Lansad)<br />
+                <span style="color: var(--text-tertiary); font-size: 0.8rem"
+                  >Ne compte pas dans la moyenne générale<br />Diviseur : 27
+                  crédits</span
+                >
               </div>
             </div>
           </div>
-
-        </div><!-- end s6 blocs-grid -->
-      </div><!-- end s6-content -->
+        </div>
+        <!-- end s6 blocs-grid -->
+      </div>
+      <!-- end s6-content -->
 
       <footer>MaNote - Made with ❤️ by aldothedev</footer>
     </div>
