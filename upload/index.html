@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MaNote | Upload Notes</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      .upload-zone {
+        border: 2px dashed rgba(0, 245, 212, 0.3);
+        border-radius: 16px;
+        padding: 56px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 24px;
+      }
+      .upload-zone:hover,
+      .upload-zone.drag-over {
+        border-color: rgba(0, 245, 212, 0.8);
+        background: rgba(0, 245, 212, 0.04);
+        transform: translateY(-2px);
+      }
+      .upload-icon { font-size: 3.5rem; margin-bottom: 12px; }
+      .upload-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+      .upload-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+
+      .detection-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      }
+      .detection-icon { font-size: 2.2rem; flex-shrink: 0; }
+      .detection-ue-name { font-size: 1.1rem; font-weight: 600; color: var(--neon-cyan); }
+      .detection-ue-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.6; }
+      .detection-ue-meta code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-family: "Space Mono", monospace;
+        color: var(--neon-cyan);
+      }
+
+      .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .preview-count { color: var(--text-secondary); font-size: 0.9rem; }
+
+      .preview-table-wrap {
+        border-radius: 12px;
+        overflow: auto;
+        max-height: 460px;
+      }
+      .preview-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+      .preview-table th {
+        position: sticky;
+        top: 0;
+        background: rgba(18, 18, 30, 0.97);
+        backdrop-filter: blur(10px);
+        padding: 10px 14px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        white-space: nowrap;
+      }
+      .preview-table td {
+        padding: 7px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .preview-table tr:hover td { background: rgba(255, 255, 255, 0.03); }
+      .grade-val {
+        font-family: "Space Mono", monospace;
+        color: var(--neon-cyan);
+        font-size: 0.82rem;
+      }
+      .grade-abi { color: rgba(255, 255, 255, 0.22); font-style: italic; font-size: 0.8rem; }
+      .student-num { font-family: "Space Mono", monospace; font-size: 0.82rem; }
+
+      .upload-progress { margin: 14px 0 18px; }
+      .progress-track {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        height: 6px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+      .progress-track-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+        transition: width 0.4s ease;
+        width: 0%;
+      }
+      .progress-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.88rem;
+        margin-bottom: 20px;
+        transition: color 0.2s;
+      }
+      .back-btn:hover { color: var(--neon-cyan); }
+
+      .new-upload-btn {
+        display: block;
+        margin-top: 16px;
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-secondary);
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.88rem;
+        transition: all 0.2s;
+        font-family: inherit;
+        width: 100%;
+      }
+      .new-upload-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+      .col-mapping {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .col-tag {
+        font-size: 0.75rem;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 6px;
+        padding: 2px 8px;
+        color: var(--text-secondary);
+      }
+      .col-tag code {
+        color: var(--neon-cyan);
+        font-family: "Space Mono", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="animated-bg">
+      <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+      </div>
+    </div>
+
+    <div class="container" style="max-width: 860px">
+      <div class="header">
+        <div class="header-top">
+          <div class="logo">MaNote</div>
+        </div>
+        <div class="header-center">
+          <div class="badge">Admin</div>
+          <h1>Upload des Notes</h1>
+          <p class="subtitle" id="subtitle">
+            Importe un PDF — détection automatique de l'UE et des colonnes
+          </p>
+        </div>
+      </div>
+
+      <a href="../index.html" class="back-btn">← Retour à l'app</a>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone glass" id="upload-zone">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Glisse le PDF ici</div>
+        <div class="upload-subtitle">
+          ou <strong>clique</strong> pour sélectionner ·
+          "Fichier des notes de …" (Université de Strasbourg)
+        </div>
+        <input type="file" id="pdf-input" accept=".pdf" style="display: none" />
+      </div>
+
+      <!-- Detection -->
+      <div id="detection-section" style="display: none">
+        <div class="detection-card glass">
+          <div class="detection-icon">📚</div>
+          <div>
+            <div class="detection-ue-name" id="detected-name"></div>
+            <div class="detection-ue-meta">
+              Code UE : <code id="detected-code"></code>
+            </div>
+            <div class="col-mapping" id="col-mapping"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div id="preview-section" style="display: none">
+        <div class="preview-header">
+          <div class="preview-count">
+            <span id="preview-count">0</span> étudiants détectés
+          </div>
+          <button class="modal-btn primary" id="upload-btn">
+            Uploader dans Supabase 🚀
+          </button>
+        </div>
+
+        <div id="upload-progress" style="display: none" class="upload-progress">
+          <div class="progress-track">
+            <div class="progress-track-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-label" id="progress-label"></div>
+        </div>
+
+        <div class="preview-table-wrap glass">
+          <table class="preview-table">
+            <thead id="preview-thead"></thead>
+            <tbody id="preview-tbody"></tbody>
+          </table>
+        </div>
+
+        <button class="new-upload-btn" id="new-upload-btn">
+          + Importer un autre PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <span class="toast-icon">✓</span>
+      <span id="toast-message"></span>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ===== MAPPINGS =====
+      const UE_MAP = {
+        "interaction hommes-machines": "ihm",
+        "interaction homme-machine": "ihm",
+        "theorie des langages": "tdl",
+        "projet integrateur": "projet_s6",
+        "intelligence artificielle": "ia",
+        "reseaux locaux": "reseaux_loc",
+        "geometrie pour la 3d": "geo3d",
+        "programmation mobile": "mobile",
+        "methodologie scientifique": "methodo",
+        droit: "droit",
+        "mediation scientifique en info": "mediation",
+        "mediation scientifique": "mediation",
+        "graphes et algorithmes": "ga",
+        "problem solving": "ps",
+        "probabilites et statistiques": "proba",
+        "traitement du signal": "signal",
+        "architecture des systemes d'exploitation": "ase",
+        "algorithmes reseaux": "reseaux",
+        "bases de donnees 2": "bd2",
+        "genie logiciel": "gl",
+      };
+
+      const COL_MAP = {
+        oral: "oral",
+        "rendus ecrits": "rendus",
+        realisation: "realisation",
+        "ecrit 1": "ecrit1",
+        "ecrit 2": "ecrit2",
+        "ecrit 3": "ecrit3",
+        ecrit: "ecrit",
+        projet: "projet",
+        "tp note": "tp",
+        "tp notes": "tp",
+        tp: "tp",
+        rendu: "rendu",
+        "epreuve rendue": "rendu",
+        qcm: "qcm",
+        "quizz 1": "quizz1",
+        "quiz 1": "quizz1",
+        "quizz 2": "quizz2",
+        "quiz 2": "quizz2",
+        "quizz 3": "quizz3",
+        "quiz 3": "quizz3",
+        assiduite: "assiduite",
+        "rapport ecrit": "rapport",
+        soutenance: "soutenance",
+        "project 1": "pr1",
+        "project 2": "pr2",
+      };
+
+      function normalize(str) {
+        return str
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function lookupUE(name) {
+        const n = normalize(name);
+        if (UE_MAP[n]) return UE_MAP[n];
+        for (const [k, v] of Object.entries(UE_MAP)) {
+          if (n.includes(k) || k.includes(n)) return v;
+        }
+        return null;
+      }
+
+      function lookupCol(name) {
+        const n = normalize(name);
+        if (COL_MAP[n]) return COL_MAP[n];
+        for (const [k, v] of Object.entries(COL_MAP)) {
+          if (n === k) return v;
+        }
+        return null;
+      }
+
+      // ===== PDF TEXT EXTRACTION =====
+      async function extractLines(file) {
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+        const result = [];
+
+        for (let p = 1; p <= pdf.numPages; p++) {
+          const page = await pdf.getPage(p);
+          const content = await page.getTextContent();
+
+          const items = content.items
+            .filter((i) => i.str.trim())
+            .map((i) => ({ str: i.str, x: i.transform[4], y: i.transform[5] }));
+
+          if (!items.length) continue;
+
+          // Group items by y-coordinate with ±3 tolerance
+          items.sort((a, b) => b.y - a.y);
+          const groups = [];
+          let cur = [items[0]];
+
+          for (let i = 1; i < items.length; i++) {
+            if (Math.abs(items[i].y - cur[0].y) <= 3) {
+              cur.push(items[i]);
+            } else {
+              groups.push(cur.sort((a, b) => a.x - b.x));
+              cur = [items[i]];
+            }
+          }
+          groups.push(cur.sort((a, b) => a.x - b.x));
+
+          for (const g of groups) {
+            const line = g
+              .map((i) => i.str)
+              .join(" ")
+              .replace(/\s+/g, " ")
+              .trim();
+            if (line) result.push(line);
+          }
+        }
+
+        return result;
+      }
+
+      // ===== PARSE GRADE LINES =====
+      function parseLines(lines) {
+        let ueName = null;
+        let columns = [];
+        const rows = [];
+
+        for (const line of lines) {
+          // Detect UE name from "Fichier des notes de …"
+          const ueMatch = line.match(/fichier des notes de\s+(.+)/i);
+          if (ueMatch) {
+            ueName = ueMatch[1]
+              .replace(/\s+au\s+\d{2}\/\d{2}\/\d{4}.*/i, "")
+              .trim();
+          }
+
+          // Detect column header line (contains "N°" and "(coef")
+          if (
+            (line.startsWith("N°") || line.startsWith("N ")) &&
+            line.includes("coef")
+          ) {
+            // Strip the leading "N°" before extracting column names
+            const headerPart = line.replace(/^N[°o]?\s*/i, "");
+            const colRx = /\*?(.+?)\s*\(coef\s*[\d.]+\)/g;
+            let m;
+            while ((m = colRx.exec(headerPart)) !== null) {
+              columns.push(m[1].trim().replace(/^\*+\s*/, ""));
+            }
+          }
+
+          // Detect data rows: 8-digit student number followed by grades
+          const rowMatch = line.match(/^(\d{8})\s+(.+)$/);
+          if (rowMatch) {
+            const tokens = rowMatch[2].trim().split(/\s+/);
+            rows.push({ studentNumber: rowMatch[1], tokens });
+          }
+        }
+
+        return { ueName, columns, rows };
+      }
+
+      // ===== STATE =====
+      let parsedData = null;
+
+      async function processPDF(file) {
+        document.getElementById("subtitle").textContent =
+          "Analyse du PDF en cours…";
+
+        try {
+          const lines = await extractLines(file);
+          const { ueName, columns, rows } = parseLines(lines);
+
+          if (!ueName)
+            throw new Error(
+              "Impossible de détecter le nom de l'UE dans ce PDF."
+            );
+
+          const ueCode = lookupUE(ueName);
+          if (!ueCode) throw new Error(`UE non reconnue : "${ueName}"`);
+
+          const noteFields = columns.map(lookupCol);
+          const unknownCols = columns.filter((_, i) => !noteFields[i]);
+          if (unknownCols.length)
+            throw new Error(
+              `Colonnes non reconnues : ${unknownCols.join(", ")}`
+            );
+
+          const students = rows
+            .map(({ studentNumber, tokens }) => {
+              const grades = {};
+              noteFields.forEach((field, i) => {
+                const t = tokens[i];
+                if (t && t !== "ABI" && !isNaN(parseFloat(t))) {
+                  grades[field] = parseFloat(t);
+                }
+              });
+              return { studentNumber, grades };
+            })
+            .filter((s) => Object.keys(s.grades).length > 0);
+
+          parsedData = { ueName, ueCode, columns, noteFields, students };
+
+          document.getElementById("upload-zone").style.display = "none";
+          renderDetection();
+          renderPreview();
+          document.getElementById("subtitle").textContent = `${students.length} étudiants · ${columns.length} note(s) par étudiant`;
+        } catch (err) {
+          document.getElementById("subtitle").textContent =
+            "Importe un PDF — détection automatique de l'UE et des colonnes";
+          showToast("❌ " + err.message);
+          console.error(err);
+        }
+      }
+
+      function renderDetection() {
+        document.getElementById("detected-name").textContent = parsedData.ueName;
+        document.getElementById("detected-code").textContent = parsedData.ueCode;
+
+        const colMapping = document.getElementById("col-mapping");
+        colMapping.innerHTML = parsedData.columns
+          .map(
+            (c, i) =>
+              `<span class="col-tag">${c} → <code>${parsedData.noteFields[i]}</code></span>`
+          )
+          .join("");
+
+        document.getElementById("detection-section").style.display = "";
+      }
+
+      function renderPreview() {
+        const thead = document.getElementById("preview-thead");
+        const tbody = document.getElementById("preview-tbody");
+
+        thead.innerHTML =
+          "<tr><th>N° Étudiant</th>" +
+          parsedData.columns.map((c) => `<th>${c}</th>`).join("") +
+          "</tr>";
+
+        tbody.innerHTML = parsedData.students
+          .map(({ studentNumber, grades }) => {
+            const cells = parsedData.noteFields
+              .map((f) =>
+                grades[f] !== undefined
+                  ? `<td class="grade-val">${grades[f].toFixed(3)}</td>`
+                  : `<td class="grade-abi">ABI</td>`
+              )
+              .join("");
+            return `<tr><td class="student-num">${studentNumber}</td>${cells}</tr>`;
+          })
+          .join("");
+
+        document.getElementById("preview-count").textContent =
+          parsedData.students.length;
+        document.getElementById("preview-section").style.display = "";
+      }
+
+      // ===== UPLOAD TO SUPABASE =====
+      async function uploadToSupabase() {
+        if (!parsedData) return;
+
+        if (!window.supabaseClient) {
+          showToast("❌ Supabase non configuré");
+          return;
+        }
+
+        const btn = document.getElementById("upload-btn");
+        btn.disabled = true;
+        btn.textContent = "Upload en cours…";
+
+        const progressWrap = document.getElementById("upload-progress");
+        const fill = document.getElementById("progress-fill");
+        const label = document.getElementById("progress-label");
+        progressWrap.style.display = "";
+
+        try {
+          // Build all grade records
+          const records = [];
+          parsedData.students.forEach(({ studentNumber, grades }) => {
+            Object.entries(grades).forEach(([noteField, grade]) => {
+              records.push({
+                student_number: studentNumber,
+                ue: parsedData.ueCode,
+                note_field: noteField,
+                grade,
+              });
+            });
+          });
+
+          label.textContent = "Suppression des anciennes notes…";
+          fill.style.width = "10%";
+
+          // Delete all existing records for this UE
+          const { error: delErr } = await window.supabaseClient
+            .from(window.GRADES_TABLE)
+            .delete()
+            .eq("ue", parsedData.ueCode);
+          if (delErr) throw delErr;
+
+          fill.style.width = "25%";
+
+          // Insert in batches of 500
+          const BATCH = 500;
+          for (let i = 0; i < records.length; i += BATCH) {
+            const batch = records.slice(i, i + BATCH);
+            label.textContent = `Insertion… ${Math.min(i + BATCH, records.length)} / ${records.length}`;
+            const { error: insErr } = await window.supabaseClient
+              .from(window.GRADES_TABLE)
+              .insert(batch);
+            if (insErr) throw insErr;
+            fill.style.width =
+              25 + ((i + batch.length) / records.length) * 70 + "%";
+          }
+
+          fill.style.width = "100%";
+          label.textContent = "Terminé !";
+          btn.textContent = "✓ Uploadé !";
+          showToast(
+            `✨ ${records.length} notes pour ${parsedData.students.length} étudiants uploadées !`
+          );
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = "Uploader dans Supabase 🚀";
+          showToast("❌ " + err.message);
+          console.error(err);
+        }
+      }
+
+      function resetUpload() {
+        parsedData = null;
+        document.getElementById("upload-zone").style.display = "";
+        document.getElementById("detection-section").style.display = "none";
+        document.getElementById("preview-section").style.display = "none";
+        document.getElementById("upload-progress").style.display = "none";
+        const btn = document.getElementById("upload-btn");
+        btn.disabled = false;
+        btn.textContent = "Uploader dans Supabase 🚀";
+        document.getElementById("pdf-input").value = "";
+        document.getElementById("subtitle").textContent =
+          "Importe un PDF — détection automatique de l'UE et des colonnes";
+      }
+
+      // ===== TOAST =====
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        document.getElementById("toast-message").textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      // ===== EVENTS =====
+      const zone = document.getElementById("upload-zone");
+      const input = document.getElementById("pdf-input");
+
+      zone.addEventListener("click", () => input.click());
+      input.addEventListener("change", (e) => {
+        if (e.target.files[0]) processPDF(e.target.files[0]);
+      });
+
+      zone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        zone.classList.add("drag-over");
+      });
+      zone.addEventListener("dragleave", () =>
+        zone.classList.remove("drag-over")
+      );
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        zone.classList.remove("drag-over");
+        const f = e.dataTransfer.files[0];
+        if (f?.type === "application/pdf") processPDF(f);
+        else showToast("⚠️ Sélectionne un fichier PDF");
+      });
+
+      document
+        .getElementById("upload-btn")
+        .addEventListener("click", uploadToSupabase);
+      document
+        .getElementById("new-upload-btn")
+        .addEventListener("click", resetUpload);
+    </script>
+  </body>
+</html>
