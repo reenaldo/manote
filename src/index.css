@@ -1,0 +1,52 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #FFFFFF;
+  --surface:   #F7F7F7;
+  --border:    #E8E8E8;
+  --border-md: #D4D4D4;
+  --text:      #0D0D0D;
+  --sub:       #525252;
+  --muted:     #A3A3A3;
+  --accent:    #0D0D0D;
+  --accent-fg: #FFFFFF;
+  --success:   #16A34A;
+  --danger:    #DC2626;
+  --warn:      #D97706;
+  --blue:      #2563EB;
+  --radius-sm: 4px;
+  --radius:    8px;
+  --radius-lg: 12px;
+}
+
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+::selection {
+  background: #0D0D0D;
+  color: #FFFFFF;
+}
