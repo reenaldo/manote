@@ -373,26 +373,33 @@
 @media (max-width: 600px) {
   .moyenne-card {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: stretch;
+    gap: 0;
     padding: 20px;
   }
 
+  /* Score goes first */
   .moyenne-card-right {
-    align-items: flex-start;
+    order: -1;
     flex-direction: row;
-    align-items: baseline;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
   }
 
-  .moyenne-value { font-size: 40px; }
-  .moyenne-denom { font-size: 16px; }
+  .moyenne-card-meta {
+    gap: 3px;
+  }
+
+  .moyenne-value { font-size: 44px; }
+  .moyenne-denom { font-size: 17px; }
 
   .moyenne-badge { align-self: center; }
 
-  .moyenne-card-student {
-    font-size: 16px;
-  }
+  .moyenne-card-student { font-size: 15px; }
 
   .bloc-header {
     padding: 12px 4px 12px 12px;
