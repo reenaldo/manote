@@ -46,6 +46,13 @@ input, select, textarea {
   font-size: inherit;
 }
 
+/* Prevent iOS Safari zoom on input focus (requires font-size >= 16px) */
+@supports (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
 ::selection {
   background: #0D0D0D;
   color: #FFFFFF;
