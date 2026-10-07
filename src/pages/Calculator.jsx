@@ -214,6 +214,7 @@ export default function Calculator({ student }) {
     setLoading(false)
   }, [])
 
+  useEffect(() => { window.scrollTo(0, 0) }, [])
   useEffect(() => { load(student) }, [student, load])
 
   const handleProgramSelect = async (code) => {
