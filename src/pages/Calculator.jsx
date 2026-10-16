@@ -49,12 +49,9 @@ async function fetchData(student) {
     const inferred = await inferProgram(student.student_number)
     if (!inferred) return { blocs: null, noProgram: true }
     // Save inferred program so we don't repeat this lookup
-    await supabase.from('students').upsert({
-      student_number: student.student_number,
-      first_name: student.first_name || null,
-      last_name:  student.last_name  || null,
-      program: inferred,
-    }, { onConflict: 'student_number' })
+    await supabase.from('students')
+      .update({ program: inferred })
+      .eq('student_number', student.student_number)
     return fetchData({ ...student, program: inferred })
   }
 
@@ -218,12 +215,9 @@ export default function Calculator({ student }) {
   useEffect(() => { load(student) }, [student, load])
 
   const handleProgramSelect = async (code) => {
-    await supabase.from('students').upsert({
-      student_number: student.student_number,
-      first_name: student.first_name || null,
-      last_name:  student.last_name  || null,
-      program: code,
-    }, { onConflict: 'student_number' })
+    await supabase.from('students')
+      .update({ program: code })
+      .eq('student_number', student.student_number)
     load({ ...student, program: code })
   }
 
