@@ -75,6 +75,46 @@
   border-radius: 3px;
 }
 
+/* ── Nav right group ─────────────────────────────────────────── */
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Nav tabs ────────────────────────────────────────────────── */
+
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.nav-tab {
+  background: none;
+  border: none;
+  padding: 5px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--muted);
+  transition: color 120ms ease-out, background 120ms ease-out;
+}
+
+.nav-tab:hover { color: var(--text); }
+
+.nav-tab.active {
+  background: #FFFFFF;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
 .nav-admin {
   background: none;
   border: 1px solid var(--border);
@@ -112,8 +152,10 @@
 }
 
 @media (max-width: 600px) {
-  .nav { padding: 0 20px; }
-  .main { padding: 32px 20px 64px; }
+  .nav { padding: 0 16px; }
+  .main { padding: 28px 16px 64px; }
+  .nav-tabs { gap: 1px; }
+  .nav-tab { padding: 5px 10px; font-size: 11px; }
 }
 
 /* ── Admin login ─────────────────────────────────────────────── */

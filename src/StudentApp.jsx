@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Lookup from './pages/Lookup'
 import Calculator from './pages/Calculator'
+import FreeRooms from './pages/FreeRooms'
 
 const SESSION_KEY = 'manote_student'
 
@@ -11,6 +12,8 @@ export default function StudentApp() {
       return saved ? JSON.parse(saved) : null
     } catch { return null }
   })
+
+  const [tab, setTab] = useState('notes') // 'notes' | 'salles'
 
   const handleFound = (s) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(s))
@@ -25,20 +28,44 @@ export default function StudentApp() {
   return (
     <div className="app">
       <nav className="nav">
-        <div className="nav-logo" style={{ cursor: student ? 'pointer' : 'default' }}
-          onClick={student ? handleChange : undefined}>
+        <div
+          className="nav-logo"
+          style={{ cursor: 'pointer' }}
+          onClick={() => { setTab('notes'); if (student) handleChange() }}
+        >
           MANOTE
         </div>
-        {student && (
-          <button className="nav-admin" onClick={handleChange}>
-            Changer d'étudiant
-          </button>
-        )}
+
+        <div className="nav-right">
+          <div className="nav-tabs">
+            <button
+              className={`nav-tab ${tab === 'notes' ? 'active' : ''}`}
+              onClick={() => setTab('notes')}
+            >
+              Notes
+            </button>
+            <button
+              className={`nav-tab ${tab === 'salles' ? 'active' : ''}`}
+              onClick={() => setTab('salles')}
+            >
+              Salles libres
+            </button>
+          </div>
+
+          {student && tab === 'notes' && (
+            <button className="nav-admin" onClick={handleChange}>
+              Changer
+            </button>
+          )}
+        </div>
       </nav>
+
       <main className="main">
-        {!student
-          ? <Lookup onFound={handleFound} />
-          : <Calculator student={student} />
+        {tab === 'salles'
+          ? <FreeRooms />
+          : !student
+            ? <Lookup onFound={handleFound} />
+            : <Calculator student={student} />
         }
       </main>
     </div>
