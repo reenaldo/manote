@@ -5,6 +5,9 @@ import './FreeRooms.css'
 // Add more group/room resource IDs here to expand coverage
 const RESOURCE_IDS = ['19976']
 
+// University closing time (last course ends at 17:30 Paris)
+const CLOSING = { hour: 17, minute: 30 }
+
 // ─── iCal parser ─────────────────────────────────────────────────────────────
 
 function unfoldIcal(text) {
@@ -80,7 +83,7 @@ function fmtDuration(minutes) {
   return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`
 }
 
-function computeRooms(events, now) {
+function computeRooms(events, now, bypassClosing = false) {
   const parisNow = toParisTime(now)
 
   // Today boundaries in Paris time
@@ -88,6 +91,13 @@ function computeRooms(events, now) {
   todayStart.setHours(0, 0, 0, 0)
   const todayEnd = new Date(todayStart)
   todayEnd.setDate(todayEnd.getDate() + 1)
+
+  // University closing time today
+  const closingTime = new Date(todayStart)
+  closingTime.setHours(CLOSING.hour, CLOSING.minute, 0, 0)
+
+  // After closing — nothing to show (unless user chose to check anyway)
+  if (!bypassClosing && parisNow >= closingTime) return []
 
   // Group today's events by room
   const byRoom = {}
@@ -133,7 +143,11 @@ function computeRooms(events, now) {
       })
     } else {
       const next = roomEvents.find(e => e.start > parisNow)
-      const freeUntil = next ? next.start : null
+      // Cap free-until at closing time (unless bypassed)
+      const rawFreeUntil = next ? next.start : null
+      const freeUntil = bypassClosing
+        ? rawFreeUntil
+        : (rawFreeUntil ? (rawFreeUntil < closingTime ? rawFreeUntil : closingTime) : closingTime)
       const mins = freeUntil ? minutesUntil(freeUntil, parisNow) : null
       results.push({
         room,
@@ -150,11 +164,7 @@ function computeRooms(events, now) {
   results.sort((a, b) => {
     if (a.free && !b.free) return -1
     if (!a.free && b.free) return 1
-    if (a.free && b.free) {
-      if (a.minutesFree === null) return -1
-      if (b.minutesFree === null) return 1
-      return b.minutesFree - a.minutesFree
-    }
+    if (a.free && b.free) return b.minutesFree - a.minutesFree
     return a.minutesBusy - b.minutesBusy
   })
 
@@ -164,11 +174,13 @@ function computeRooms(events, now) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function FreeRooms() {
-  const [rooms,     setRooms]     = useState(null)
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
-  const [lastFetch, setLastFetch] = useState(null)
-  const [now,       setNow]       = useState(new Date())
+  const [rooms,          setRooms]          = useState(null)
+  const [events,         setEvents]         = useState([])
+  const [loading,        setLoading]        = useState(true)
+  const [error,          setError]          = useState(null)
+  const [lastFetch,      setLastFetch]      = useState(null)
+  const [now,            setNow]            = useState(new Date())
+  const [bypassClosing,  setBypassClosing]  = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -178,9 +190,10 @@ export default function FreeRooms() {
       const res = await fetch(url)
       if (!res.ok) throw new Error(`Erreur ${res.status}`)
       const text = await res.text()
-      const events = parseIcal(text)
+      const parsed = parseIcal(text)
       const current = new Date()
-      setRooms(computeRooms(events, current))
+      setEvents(parsed)
+      setRooms(computeRooms(parsed, current, bypassClosing))
       setNow(current)
       setLastFetch(current)
     } catch (err) {
@@ -188,7 +201,7 @@ export default function FreeRooms() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [bypassClosing])
 
   useEffect(() => {
     load()
@@ -201,6 +214,11 @@ export default function FreeRooms() {
     const id = setInterval(() => setNow(new Date()), 60000)
     return () => clearInterval(id)
   }, [])
+
+  // Recompute when now or bypassClosing changes
+  useEffect(() => {
+    if (events.length > 0) setRooms(computeRooms(events, now, bypassClosing))
+  }, [now, bypassClosing, events])
 
   const freeRooms = rooms?.filter(r => r.free) ?? []
   const busyRooms = rooms?.filter(r => !r.free) ?? []
@@ -237,7 +255,25 @@ export default function FreeRooms() {
         </div>
       )}
 
-      {rooms && (
+      {rooms && rooms.length === 0 && !bypassClosing && (
+        <div className="fr-closed">
+          <div className="fr-closed-main">
+            <span className="fr-closed-icon">🔒</span>
+            <p className="fr-closed-text">L'université est fermée (après {CLOSING.hour}h{String(CLOSING.minute).padStart(2,'0')})</p>
+          </div>
+          <button className="fr-closed-bypass" onClick={() => setBypassClosing(true)}>
+            Voir quand même →
+          </button>
+        </div>
+      )}
+
+      {bypassClosing && (
+        <div className="fr-bypass-banner">
+          Horaires indicatifs — l'université est normalement fermée après {CLOSING.hour}h{String(CLOSING.minute).padStart(2,'0')}.
+        </div>
+      )}
+
+      {rooms && rooms.length > 0 && (
         <>
           {/* Summary */}
           <div className="fr-summary">
@@ -270,11 +306,11 @@ export default function FreeRooms() {
                       <span className="fr-card-name">{r.room}</span>
                       {r.minutesFree !== null
                         ? <span className="fr-badge free">{fmtDuration(r.minutesFree)}</span>
-                        : <span className="fr-badge free-all">toute la journée</span>
+                        : <span className="fr-badge free">libre</span>
                       }
                     </div>
                     {r.freeUntilStr
-                      ? <div className="fr-card-sub">prochain cours à <strong>{r.freeUntilStr}</strong></div>
+                      ? <div className="fr-card-sub">libre jusqu'à <strong>{r.freeUntilStr}</strong></div>
                       : <div className="fr-card-sub">aucun cours ce jour</div>
                     }
                   </div>
