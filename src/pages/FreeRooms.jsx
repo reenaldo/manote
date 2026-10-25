@@ -239,9 +239,9 @@ export default function FreeRooms() {
         <div className="fr-header-right">
           <span className="fr-clock">{clockStr}</span>
           <button className="fr-refresh" onClick={load} disabled={loading} title="Actualiser">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.5 2.5A6 6 0 1 1 9 1.2"/>
-              <polyline points="9 1 12.5 1 12.5 4.5"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
             </svg>
           </button>
         </div>
@@ -258,16 +258,24 @@ export default function FreeRooms() {
       {rooms && rooms.length === 0 && !bypassClosing && (
         <div className="fr-closed">
           <div className="fr-closed-main">
-            <span className="fr-closed-icon">🔒</span>
-            <p className="fr-closed-text">L'université est fermée (après {CLOSING.hour}h{String(CLOSING.minute).padStart(2,'0')})</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span className="fr-closed-icon">🔒</span>
+              <p className="fr-closed-text">L'université est fermée (après {CLOSING.hour}h{String(CLOSING.minute).padStart(2,'0')})</p>
+            </div>
+            <button className="fr-closed-bypass" onClick={() => setBypassClosing(true)}>
+              Voir quand même →
+            </button>
           </div>
-          <button className="fr-closed-bypass" onClick={() => setBypassClosing(true)}>
-            Voir quand même →
-          </button>
         </div>
       )}
 
-      {bypassClosing && (
+      {rooms && rooms.length === 0 && bypassClosing && (
+        <div className="fr-closed">
+          <p className="fr-closed-text">Aucun cours prévu aujourd'hui — toutes les salles sont probablement libres.</p>
+        </div>
+      )}
+
+      {bypassClosing && rooms && rooms.length > 0 && (
         <div className="fr-bypass-banner">
           Horaires indicatifs — l'université est normalement fermée après {CLOSING.hour}h{String(CLOSING.minute).padStart(2,'0')}.
         </div>

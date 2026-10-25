@@ -51,14 +51,18 @@
   width: 30px;
   height: 30px;
   background: none;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 7px;
   color: var(--muted);
-  transition: color 120ms ease-out, border-color 120ms ease-out, transform 150ms ease-out;
+  cursor: pointer;
+  transition: color 120ms ease-out, background 120ms ease-out, transform 80ms ease-out;
 }
 
-.fr-refresh:hover   { color: var(--text); border-color: var(--border-md); }
-.fr-refresh:active  { transform: scale(0.94); }
+@media (hover: hover) and (pointer: fine) {
+  .fr-refresh:hover { color: var(--text); background: var(--surface); }
+}
+
+.fr-refresh:active   { transform: scale(0.82); transition-duration: 60ms; }
 .fr-refresh:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ── Summary card ─────────────────────────────────────────────── */
@@ -266,9 +270,8 @@
 
 .fr-closed {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
   padding: 18px 22px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -280,6 +283,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .fr-closed-icon { font-size: 16px; }
@@ -306,6 +311,14 @@
 
 .fr-closed-bypass:hover  { color: var(--text); border-color: var(--border-md); }
 .fr-closed-bypass:active { transform: scale(0.96); }
+
+.fr-bypass-inline {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: -0.01em;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
 
 .fr-bypass-banner {
   font-size: 11px;
